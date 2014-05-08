@@ -4,6 +4,7 @@
     "description": "This library makes general 3D rendering possible in Elm. It provides the core functionality for creating models and using shaders, with the long-term goal that other libraries will build upon this basic functionality.",
     "license": "BSD3",
     "exposed-modules": ["Graphics.WebGL"],
+    "native-modules": ["Native.Graphics.WebGL"],
     "elm-version": "0.12.1.3",
     "dependencies": {},
     "repository": "https://github.com/johnpmayer/elm-webgl.git"
