@@ -4,8 +4,15 @@ A simple API for rendering with WebGL. This is useful for both 2D and 3D
 rendering because it lets you take advantage of hardware acceleration with the
 GPU, meaning you can rendering things more quickly.
 
-To get the most out of this library and out of the GPU, there are two general
-concepts to understand: models and shaders.
+## Understanding WebGL
+
+To get the most out of this library and out of the GPU, it is best to pair some
+examples with a fairly solid understanding of how information flows through the
+rendering pipeline. This section gives a high-level overview of the pipeline
+and the corresponding terminology.
+
+At a high-level, there are two general concepts to understand: models and
+shaders. The details of each of these are crucial to using WebGL effectively.
 
 ### Models
 
@@ -37,11 +44,6 @@ In Elm, shaders are defined with a language called
 that take in small high-level values and do a bunch of rendering based on that.
 For example, you can send over a matrix that represents where the camera should
 be and all of the models loded onto the GPU will be transformed accordingly.
-
-To understand what is going on with shaders it is best to pair some examples
-with a fairly solid understanding of how information flows through the rendering
-pipeline. The rest of this section gives a high-level overview of the pipeline
-and the terminology used to describe it.
 
 There are two types of shaders used in Elm:
 
