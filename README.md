@@ -45,12 +45,12 @@ and the terminology used to describe it.
 
 There are two types of shaders used in Elm:
 
- * [Vertex Shaders](http://en.wikipedia.org/wiki/Shader#Vertex_shaders) &mdash;
+ * [**Vertex Shaders**](http://en.wikipedia.org/wiki/Shader#Vertex_shaders) &mdash;
    This runs once per vertex loaded into the GPU with the goal of flattening a
    point in 3D space into the 2D image to be shown on screen. This shader can
    manipulate things like the position, color, and texture of vertices.
 
- * [Fragment Shaders](http://en.wikipedia.org/wiki/Shader#Pixel_shaders) &mdash;
+ * [**Fragment Shaders**](http://en.wikipedia.org/wiki/Shader#Pixel_shaders) &mdash;
    Also known as pixel shaders, these shaders are like filters on individual
    pixels. They let you work with pixels to add lighting effects or add
    postprocessing effects like blur or edge-detection.
