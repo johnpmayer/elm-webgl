@@ -44,6 +44,8 @@ that take in small high-level values and do a bunch of rendering based on that.
 For example, you can send over a matrix that represents where the camera should
 be and all of the meshes loded onto the GPU will be transformed accordingly.
 
+### Combining Meshes and Shaders
+
 The following diagram does a shockingly good job of illustrating the entire
 pipeline. Keep reading past the diagram, all the terms will be explained!
 
@@ -54,9 +56,9 @@ we want to render on screen. From there, the data flows through two types of sha
 
  * [**Vertex Shaders**](http://en.wikipedia.org/wiki/Shader#Vertex_shaders) &mdash;
    Each corner of a triangle is called a vertex. This shader has access to all of the
-   attributes&mdash;like position and color and normals&mdash;associated with each
-   vertex. This shader can use those attributes to adjust the color of a shape based
-   on if it is facing a light or not.
+   attributes&mdash;like position and color&mdash;associated with each vertex. This
+   shader can use those attributes to adjust the color of a shape based on if it is
+   facing a light or not.
 
  * [**Fragment Shaders**](http://en.wikipedia.org/wiki/Shader#Pixel_shaders) &mdash;
    Also known as pixel shaders, these shaders are like filters on individual
