@@ -11,41 +11,49 @@ examples with a fairly solid understanding of how information flows through the
 rendering pipeline. This section gives a high-level overview of the pipeline
 and the corresponding terminology.
 
-At a high-level, there are two general concepts to understand: models and
+At a high-level, there are two general concepts to understand: meshes and
 shaders. The details of each of these are crucial to using WebGL effectively.
 
-### Models
+### Meshes
 
-A [model](http://en.wikipedia.org/wiki/3D_model) is all about shapes. It is a
-collection of triangles that represents some 3-dimensional object. All shapes
-can be approximated by placing small triangles side-by-side to build up larger
-and more complex forms.
+A mesh is all about triangles. By placing small triangles side-by-side, you can
+build up larger 3D shapes! Each corner of these triangles is called a *vertex*.
+Each vertex contains information about things like position and color. These pieces
+of information are called *attributes*. That means we can set the position and color
+(attributes) of individual corners (vertices) of a whole bunch of triangles. Together
+this makes up a mesh!
 
-We create and update our models on the CPU, so working with a model does not get
-any direct benefits from the GPU. To actually render these models, they are sent
-from the CPU to the GPU. This transfer can be quite expensive, so it is best to
-try to avoid it.
+We create and update our meshes on the CPU, so working with a model does not get
+any direct benefits from the GPU. Meshes are sent from the CPU to the GPU to be
+rendered. This transfer can be quite expensive, so it is best to try to avoid
+creating new meshes.
 
-Some tricks to minimize this include breaking a model up into many smaller
+Some tricks to minimize this include breaking a mesh up into many smaller
 pieces that can be transformed independently. For example, if you want to
-render a skeleton, each bone could be a separate model, so rather than send
-a new version of the entire model on every frame, you just send a
-transformation matrix for each bone.
+render a skeleton, each bone could be a separate mesh, so rather than send
+a new version of the entire skeleton on every frame, you just send a
+transformation for each bone.
 
 ### Shaders
 
-A [shader](http://en.wikipedia.org/wiki/Shader) is all about matching up models
-with colors and textures. A shader is a program that runs on the GPU, so it
-benefits from lots of parallelization. As a general rule, you want to be doing
-computation here rather than on the CPU if possible.
+A [shader](http://en.wikipedia.org/wiki/Shader) is all turning meshes into
+pictures. A shader is a program that runs on the GPU, so it benefits from
+lots of parallelization. As a general rule, you want to be doing computation
+here rather than on the CPU if possible.
 
 In Elm, shaders are defined with a language called
 [GLSL](http://en.wikipedia.org/wiki/OpenGL_Shading_Language). These are programs
 that take in small high-level values and do a bunch of rendering based on that.
 For example, you can send over a matrix that represents where the camera should
-be and all of the models loded onto the GPU will be transformed accordingly.
+be and all of the meshes loded onto the GPU will be transformed accordingly.
 
-There are two types of shaders used in Elm:
+The following diagram does a shockingly good job of illustrating the entire
+pipeline. Keep reading past the diagram, all the terms will be explained!
+
+![WebGL Pipeline](/pipeline.png)
+
+The "Buffers" correspond to our idea of a mesh. It's a bunch of raw data points that
+we want to render on screen. From there, the data flows through two types of shaders:
 
  * [**Vertex Shaders**](http://en.wikipedia.org/wiki/Shader#Vertex_shaders) &mdash;
    This runs once per vertex loaded into the GPU with the goal of flattening a
@@ -62,8 +70,8 @@ shader and finally to the fragment shader. To send information between shaders,
 you use three kinds of specialized variables:
 
  * **Attribute** &mdash; these are read-only variables that are specific to
-   a particular vertex. They are passed in from Elm and can only be used in
-   the vertex shader.
+   a particular vertex. They make up the mesh we defined in Elm and can be used
+   for computation in the vertex shader.
 
  * **Uniform** &mdash; these are global read-only variables that can be used
    in both the vertex and fragment shaders.
