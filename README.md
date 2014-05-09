@@ -17,11 +17,8 @@ shaders. The details of each of these are crucial to using WebGL effectively.
 ### Meshes
 
 A mesh is all about triangles. By placing small triangles side-by-side, you can
-build up larger 3D shapes! Each corner of these triangles is called a *vertex*.
-Each vertex contains information about things like position and color. These pieces
-of information are called *attributes*. That means we can set the position and color
-(attributes) of individual corners (vertices) of a whole bunch of triangles. Together
-this makes up a mesh!
+build up larger 3D shapes. We define each triangle by associating a bunch of
+attributes&mdash;like position and color&mdash;with each corner of the triangle.
 
 We create and update our meshes on the CPU, so working with a model does not get
 any direct benefits from the GPU. Meshes are sent from the CPU to the GPU to be
