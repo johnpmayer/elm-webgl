@@ -53,18 +53,18 @@ The "Buffers" correspond to our idea of a mesh. It's a bunch of raw data points 
 we want to render on screen. From there, the data flows through two types of shaders:
 
  * [**Vertex Shaders**](http://en.wikipedia.org/wiki/Shader#Vertex_shaders) &mdash;
-   This runs once per vertex loaded into the GPU with the goal of flattening a
-   point in 3D space into the 2D image to be shown on screen. This shader can
-   manipulate things like the position, color, and texture of vertices.
+   Each corner of a triangle is called a vertex. This shader has access to all of the
+   attributes&mdash;like position and color and normals&mdash;associated with each
+   vertex. This shader can use those attributes to adjust the color of a shape based
+   on if it is facing a light or not.
 
  * [**Fragment Shaders**](http://en.wikipedia.org/wiki/Shader#Pixel_shaders) &mdash;
    Also known as pixel shaders, these shaders are like filters on individual
    pixels. They let you work with pixels to add lighting effects or add
    postprocessing effects like blur or edge-detection.
 
-These shaders form a pipeline in which data flows from the CPU to the vertex
-shader and finally to the fragment shader. To send information between shaders,
-you use three kinds of specialized variables:
+The flow of data between the CPU and each of our shaders is very well defined.
+To send information between shaders, there are three kinds of specialized variables:
 
  * **Attribute** &mdash; these are read-only variables that are specific to
    a particular vertex. They make up the mesh we defined in Elm and can be used
