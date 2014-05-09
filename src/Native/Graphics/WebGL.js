@@ -43,7 +43,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
   }
 
-  function model(vert, frag, buffer, uniforms) {
+  function entity(vert, frag, buffer, uniforms) {
 
     return model = {
       vert: vert,
@@ -358,7 +358,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
   return elm.Native.Graphics.WebGL.values = {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
     loadTex:loadTex,
-    model:F4(model),
+    entity:F4(entity),
     webgl:F2(webgl)
   };
 
