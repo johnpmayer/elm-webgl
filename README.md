@@ -57,8 +57,7 @@ we want to render on screen. From there, the data flows through two types of sha
  * [**Vertex Shaders**](http://en.wikipedia.org/wiki/Shader#Vertex_shaders) &mdash;
    Our mesh is made up of lots of triangles. Each corner of a triangle is called a
    *vertex*. The vertex shader has access to all of the attributes of each vertex,
-   like position and color. This means we can adjust colors according to how close
-   a triangle is to a light source or what direction it is facing.
+   like position and color, letting us move triangles around or change their color.
 
  * [**Fragment Shaders**](http://en.wikipedia.org/wiki/Shader#Pixel_shaders) &mdash;
    Also known as pixel shaders, these shaders are like filters on individual
