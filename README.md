@@ -46,8 +46,8 @@ be and all of the meshes loded onto the GPU will be transformed accordingly.
 
 ### Combining Meshes and Shaders
 
-The following diagram does a shockingly good job of illustrating the entire
-pipeline. Keep reading past the diagram, all the terms will be explained!
+The following diagram illustrates the entire pipeline. Keep reading past the
+diagram, all the terms will be explained!
 
 ![WebGL Pipeline](/pipeline.png)
 
