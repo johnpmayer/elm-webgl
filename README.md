@@ -51,8 +51,8 @@ pipeline. Keep reading past the diagram, all the terms will be explained!
 
 ![WebGL Pipeline](/pipeline.png)
 
-The "Buffers" correspond to our idea of a mesh. It's a bunch of raw data points that
-we want to render on screen. From there, the data flows through two types of shaders:
+We start with a mesh. It's a bunch of raw data points that we want to render on
+screen. From there, the data flows through two types of shaders:
 
  * [**Vertex Shaders**](http://en.wikipedia.org/wiki/Shader#Vertex_shaders) &mdash;
    Our mesh is made up of lots of triangles. Each corner of a triangle is called a
@@ -67,12 +67,12 @@ we want to render on screen. From there, the data flows through two types of sha
 The flow of data between the CPU and each of our shaders is very well defined.
 To send information between shaders, there are three kinds of specialized variables:
 
+ * **Uniform** &mdash; these are global read-only variables that can be used
+   in both the vertex and fragment shaders.
+
  * **Attribute** &mdash; these are read-only variables that are specific to
    a particular vertex. They make up the mesh we defined in Elm and can be used
    for computation in the vertex shader.
-
- * **Uniform** &mdash; these are global read-only variables that can be used
-   in both the vertex and fragment shaders.
 
  * **Varying** &mdash; these are variables you can write in the vertex shader
    which then get passed along into the fragment shader, where they are
