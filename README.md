@@ -65,14 +65,14 @@ screen. From there, the data flows through two types of shaders:
    postprocessing effects like blur or edge-detection.
 
 The flow of data between the CPU and each of our shaders is very well defined.
-To send information between shaders, there are three kinds of specialized variables:
+To send information, there are three kinds of specialized variables:
 
  * **Uniform** &mdash; these are global read-only variables that can be used
-   in both the vertex and fragment shaders.
+   in both the vertex and fragment shaders. They are defined on the CPU.
 
- * **Attribute** &mdash; these are read-only variables that are specific to
-   a particular vertex. They make up the mesh we defined in Elm and can be used
-   for computation in the vertex shader.
+ * **Attribute** &mdash; these variables represent a particular vertex in our
+   mesh. The vertex shader takes in these variables to compute some
+   transformations on each vertex.
 
  * **Varying** &mdash; these are variables you can write in the vertex shader
    which then get passed along into the fragment shader, where they are
