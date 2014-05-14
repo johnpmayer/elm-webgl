@@ -291,10 +291,6 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
   function webgl(dimensions, models) {
 
-    if (!window.WebGLRenderingContext) {
-      throw new Error("It appears your browser does not support WebGL! http://get.webgl.org/troubleshooting");
-    }
-
     var w = dimensions._0;
     var h = dimensions._1;
 
@@ -304,7 +300,14 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
       div.style.overflow = 'hidden';
       var canvas = newNode('canvas');
       var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      gl.enable(gl.DEPTH_TEST);
+
+      if (gl) {
+        gl.enable(gl.DEPTH_TEST);
+      } else {
+        div.innerHTML =
+          '<div style="display: table-cell; text-align: center; width: ' + w + 'px; height: ' + h +
+          'px; vertical-align: middle;"><a href="http://get.webgl.org/">Enable WebGL</a> to see this content!</div>';
+      }
 
       model.cache.gl = gl;
       model.cache.canvas = canvas;
@@ -332,7 +335,12 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
       canvas.width = oldModel.w;
       canvas.height = oldModel.h;
 
-      drawGL(newModel);
+      if (newModel.cache.gl) {
+        drawGL(newModel);
+      } else {
+        div.firstChild.width = newModel.w + 'px';
+        div.firstChild.height = newModel.h + 'px';
+      }
 
       div.appendChild(canvas);
 
