@@ -173,42 +173,42 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     console.log("Drawing");
 
-    function drawModel(m) {
+    function drawEntity(entity) {
 
       var program;
-      if (m.vert.id && m.frag.id) {
-        var progid = m.vert.id + '#' + m.frag.id;
+      if (entity.vert.id && entity.frag.id) {
+        var progid = entity.vert.id + '#' + entity.frag.id;
         program = model.cache.programs[progid];
       }
 
       if (!program) {
 
         var vshader = undefined;
-        if (m.vert.id) {
-          vshader = model.cache.shaders[m.vert.id];
+        if (entity.vert.id) {
+          vshader = model.cache.shaders[entity.vert.id];
         } else {
-          m.vert.id = Utils.guid();
+          entity.vert.id = Utils.guid();
         }
 
         if (!vshader) {
-          vshader = do_compile(gl, m.vert.src, gl.VERTEX_SHADER);
-          model.cache.shaders[m.vert.id] = vshader;
+          vshader = do_compile(gl, entity.vert.src, gl.VERTEX_SHADER);
+          model.cache.shaders[entity.vert.id] = vshader;
         }
 
         var fshader = undefined;
-        if (m.frag.id) {
-          fshader = model.cache.shaders[m.frag.id];
+        if (entity.frag.id) {
+          fshader = model.cache.shaders[entity.frag.id];
         } else {
-          m.frag.id = Utils.guid();
+          entity.frag.id = Utils.guid();
         }
 
         if (!fshader) {
-          fshader = do_compile(gl, m.frag.src, gl.FRAGMENT_SHADER);
-          model.cache.shaders[m.frag.id] = fshader;
+          fshader = do_compile(gl, entity.frag.src, gl.FRAGMENT_SHADER);
+          model.cache.shaders[entity.frag.id] = fshader;
         }
 
         program = do_link(gl, vshader, fshader);
-        var progid = m.vert.id + '#' + m.frag.id;
+        var progid = entity.vert.id + '#' + entity.frag.id;
         model.cache.programs[progid] = program;
 
       }
@@ -222,19 +222,19 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
         var uniformLocation = gl.getUniformLocation(program, uniform.name);
         switch (uniform.type) {
           case gl.INT:
-            gl.uniform1i(uniformLocation, m.uniforms[uniform.name]);
+            gl.uniform1i(uniformLocation, entity.uniforms[uniform.name]);
             break;
           case gl.FLOAT:
-            gl.uniform1f(uniformLocation, m.uniforms[uniform.name]);
+            gl.uniform1f(uniformLocation, entity.uniforms[uniform.name]);
             break;
           case gl.FLOAT_VEC3:
-            gl.uniform3fv(uniformLocation, m.uniforms[uniform.name]);
+            gl.uniform3fv(uniformLocation, entity.uniforms[uniform.name]);
             break;
           case gl.FLOAT_MAT4:
-            gl.uniformMatrix4fv(uniformLocation, false, m.uniforms[uniform.name]);
+            gl.uniformMatrix4fv(uniformLocation, false, entity.uniforms[uniform.name]);
             break;
           case gl.SAMPLER_2D:
-            var texture = m.uniforms[uniform.name];
+            var texture = entity.uniforms[uniform.name];
             var tex = undefined;
             if (texture.id) {
               tex = model.cache.textures[texture.id];
@@ -257,10 +257,10 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
         }
       }
 
-      var buffer = model.cache.buffers[m.buffer.guid];
+      var buffer = model.cache.buffers[entity.buffer.guid];
       if (!buffer) {
-        buffer = do_bind(gl, program, m.buffer);
-        model.cache.buffers[m.buffer.guid] = buffer;
+        buffer = do_bind(gl, program, entity.buffer);
+        model.cache.buffers[entity.buffer.guid] = buffer;
       }
 
       var numIndices = buffer.numIndices;
@@ -289,7 +289,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
     }
 
-    List.each(drawModel, model.models);
+    List.each(drawEntity, model.models);
 
   }
 
