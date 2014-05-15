@@ -81,7 +81,7 @@ To send information, there are three kinds of specialized variables:
 
 ## Making the most of the GPU
 
-I typical mesh may be quite large, with hundreds or thousands of vertices, each
+A typical mesh may be quite large, with hundreds or thousands of vertices, each
 with a potentially large set of attributes. Working with a mesh on the CPU is
 expensive for two major reasons:
 
