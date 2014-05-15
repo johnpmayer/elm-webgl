@@ -78,3 +78,25 @@ To send information, there are three kinds of specialized variables:
    which then get passed along into the fragment shader, where they are
    read-only. This lets you pass information along as you compute things in
    your rendering pipeline.
+
+## Making the most of the GPU
+
+I typical mesh may be quite large, with hundreds or thousands of vertices, each
+with a potentially large set of attributes. Working with a mesh on the CPU is
+expensive for two major reasons:
+
+  1. The CPU is sequential, so you must work on each vertex one at a time.
+     On the GPU, you can work with tons of vertices in parallel with a Vertex
+     Shader, making things much faster.
+
+  2. Transfering data from CPU to GPU is expensive. Ideally you want to transfer
+     all of the vertices once and make any updates to the mesh by passing in
+     uniform variables to the Vertex Shader. Not only is it cheaper to send a
+     couple matrices to the GPU, but once they get there, the GPU can use them
+     in parallel.
+
+This library facilitates this by caching known meshes on the GPU. If you create
+a mesh and use it many times, it only gets transfered to the GPU once. Now if
+you update that mesh, the new version will need to be loaded onto the GPU
+separately. That means it is best to create a fairly general mesh and modify it
+with uniform variables in a Vertex Shader.
