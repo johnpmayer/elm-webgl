@@ -45,6 +45,10 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
   function entity(vert, frag, buffer, uniforms) {
 
+    if (!buffer.guid) {
+      buffer.guid = Utils.guid();
+    }
+
     return model = {
       vert: vert,
       frag: frag,
