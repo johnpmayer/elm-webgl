@@ -4,6 +4,9 @@ A simple API for rendering with WebGL. This is useful for both 2D and 3D
 rendering because it lets you take advantage of hardware acceleration with the
 GPU, meaning you can rendering things more quickly.
 
+Here are some examples so you can get a feel for the API, but make sure you
+read on to learn how WebGL and the GPU really work!
+
 <a href="http://elm-lang.org:1234/edit/examples/WebGL/Triangle.elm">
 <img src="http://elm-lang.org:1234/screenshot/WebGL/Triangle.jpg" width="120" height="120"></a>
 <a href="http://elm-lang.org:1234/edit/examples/WebGL/Cube.elm">
