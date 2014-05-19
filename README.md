@@ -118,17 +118,19 @@ with uniform variables in a Vertex Shader.
 ## Writing Shaders
 
 Shaders are written in a language called
-[GLSL](http://en.wikipedia.org/wiki/OpenGL_Shading_Language). A basic vertex
-shader could be defined like this:
+[GLSL](http://en.wikipedia.org/wiki/OpenGL_Shading_Language). This is a widely
+used language for shaders with [websites](https://www.shadertoy.com) devoted
+to sharing creative demos, so you will often be able to use that shader
+code directly in Elm. A basic vertex shader could be defined like this:
 
 ```
 vertexShader : Shader { position:Vec3, coord:Vec3 } { u | view:Mat4 } { vcoord:Vec2 }
-vertexShader = [shader|
+vertexShader = [glsl|
 
 attribute vec3 position;
 attribute vec3 coord;
-uniform mat4 view;
-varying vec2 vcoord;
+uniform   mat4 view;
+varying   vec2 vcoord;
 
 void main () {
   gl_Position = view * vec4(position, 1.0);
@@ -138,11 +140,11 @@ void main () {
 |]
 ```
 
-Within the `[shader| ... |]` block, you just write plain GLSL. Elm is actually
-aware of the types of the attributes and uniforms coming into the shader and
-the varyings coming out of the shader, so the shader block is given a type that
-enforces this API. The type of `vertexShader` says that we have two attributes
-named `position` and `coord`, one uniform named `view`, and one varying called
-`vcoord`. This means Elm's type checker can make sure you are using the shader
-in a meaningful way, avoiding a totally blank screen that can happen if your
-shader has an error in it.
+Within the `[glsl| ... |]` block, you just write plain GLSL. Elm is actually
+aware of the types of the attributes, uniforms, and varyings coming in and out
+of the shader, so the shader block is given a type that enforces this API. The
+type of `vertexShader` says that we have two attributes named `position` and
+`coord`, one uniform named `view`, and one varying called `vcoord`. This means
+Elm's type checker can make sure you are using the shader in a meaningful way,
+avoiding a totally blank screen that can happen if your shader has an error in
+it.
