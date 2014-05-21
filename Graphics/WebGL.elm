@@ -49,6 +49,8 @@ a given function.
 zipTriangle : (a -> b -> c) -> Triangle a -> Triangle b -> Triangle c
 zipTriangle f (x,y,z) (x',y',z') = (f x x', f y y', f z z')
 
+{-| Shader is a phantom data type. Don't instantiate it yourself. See below.
+-}
 data Shader attributes uniforms varyings = Shader
 
 {-| Shaders are programs for running many computations on the GPU in parallel.
