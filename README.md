@@ -3,7 +3,7 @@
 [A simple API](http://library.elm-lang.org/catalog/johnpmayer-elm-webgl/latest/)
 for rendering with WebGL. This is useful for both 2D and 3D
 rendering because it lets you take advantage of hardware acceleration with the
-GPU, meaning you can rendering things more quickly.
+GPU, meaning you can render things more quickly.
 
 Here are some examples so you can get a feel for the API, but make sure you
 read on to learn how WebGL and the GPU really work!
@@ -57,7 +57,7 @@ In Elm, shaders are defined with a language called
 [GLSL](http://en.wikipedia.org/wiki/OpenGL_Shading_Language). These are programs
 that take in small high-level values and do a bunch of rendering based on that.
 For example, you can send over a matrix that represents where the camera should
-be and all of the meshes loded onto the GPU will be transformed accordingly.
+be and all of the meshes loaded onto the GPU will be transformed accordingly.
 
 ### Combining Meshes and Shaders
 
