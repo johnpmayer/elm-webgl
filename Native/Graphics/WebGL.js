@@ -52,7 +52,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
       buffer.guid = Utils.guid();
     }
 
-    return model = {
+    return {
       vert: vert,
       frag: frag,
       buffer: buffer,
