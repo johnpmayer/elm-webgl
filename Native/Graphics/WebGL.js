@@ -1,12 +1,15 @@
 Elm.Native.Graphics.WebGL = {};
 Elm.Native.Graphics.WebGL.make = function(elm) {
 
-  // LOG LEVEL
-
   elm.Native = elm.Native || {};
   elm.Native.Graphics = elm.Native.Graphics || {};
   elm.Native.Graphics.WebGL = elm.Native.Graphics.WebGL || {};
   if (elm.Native.Graphics.WebGL.values) return elm.Native.Graphics.WebGL.values;
+
+  // setup logging
+  function LOG(msg) {
+    // console.log(msg);
+  }
 
   var newNode = ElmRuntime.use(ElmRuntime.Render.Utils).newElement;
   var newElement = Elm.Graphics.Element.make(elm).newElement;
@@ -61,7 +64,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
   function do_texture (gl, img) {
 
     var tex = gl.createTexture();
-    console.log("Created texture");
+    LOG("Created texture");
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
@@ -76,7 +79,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
   function do_compile (gl, src, tipe) {
 
     var shader = gl.createShader(tipe);
-    console.log("Created shader");
+    LOG("Created shader");
 
     gl.shaderSource(shader, src);
     gl.compileShader(shader);
@@ -92,7 +95,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
   function do_link (gl, vshader, fshader) {
 
     var program = gl.createProgram();
-    console.log("Created program");
+    LOG("Created program");
 
     gl.attachShader(program, vshader);
     gl.attachShader(program, fshader);
@@ -133,7 +136,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
           var array = new Float32Array(data);
 
           var buffer = gl.createBuffer();
-          console.log("Created attribute buffer " + attribute.name);
+          LOG("Created attribute buffer " + attribute.name);
           gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
           gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
 
@@ -142,7 +145,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
           break;
 
         default:
-          console.log("Bad buffer type");
+          LOG("Bad buffer type");
           break;
       }
 
@@ -150,7 +153,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
     var numIndices = 3 * List.length(bufferElems);
     var indices = List.toArray(List.range(0, numIndices - 1));
-    console.log("Created index buffer");
+    LOG("Created index buffer");
     var indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
@@ -171,7 +174,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
     gl.viewport(0, 0, model.w, model.h);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    console.log("Drawing");
+    LOG("Drawing");
 
     function drawEntity(entity) {
 
@@ -252,7 +255,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
             textureCounter += 1;
             break;
           default:
-            console.log("Unsupported uniform type: " + uniform.type);
+            LOG("Unsupported uniform type: " + uniform.type);
             break;
         }
       }
@@ -280,7 +283,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
             gl.vertexAttribPointer(attribLocation, 3, gl.FLOAT, false, 0, 0);
             break;
           default:
-            console.log("Unsupported attribute type: " + attribute.type);
+            LOG("Unsupported attribute type: " + attribute.type);
             break;
         }
       }
