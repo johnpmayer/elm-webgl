@@ -77,6 +77,7 @@ loadTexture = Native.Graphics.WebGL.loadTex
 
 {-| Loads a texture with given width and height, using the supplied function which maps
 pixel coordinates between (0,0) and (width-1, height-1) to RGBA values between 0 and 255.
+We use (0,0) as the top-left corner of the image.
 -}
 staticTexture : ((Int, Int) -> (Int, Int, Int, Int)) -> Int -> Int -> Texture
 staticTexture = Native.Graphics.WebGL.staticTex
