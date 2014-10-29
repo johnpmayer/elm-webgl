@@ -31,7 +31,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
     var img = new Image();
 
     img.onload = function() {
-      var success = elm.Http.values.Success({img:img});
+      var success = elm.Http.values.Success({img:img, isArray:false});
       elm.notify(response.id, success);
     }
 
@@ -44,6 +44,28 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
     return response;
 
+  }
+  
+  function staticTex(pixelFun, w, h) {
+  
+    var len = 4*w*h;
+    var data = new Uint8Array(len);
+    
+    for (i = 0; i < w; i++)
+    {
+      for (j = 0; j < h; j++)
+      {
+        var pixel = pixelFun({ctor: "_Tuple2"
+                   ,_0: i
+                   ,_1: j});
+        data[4* (j*w + i)+0] = pixel._0;
+        data[4* (j*w + i)+1] = pixel._1;
+        data[4* (j*w + i)+2] = pixel._2;
+        data[4* (j*w + i)+3] = pixel._3;
+      }
+    }    
+    
+    return {img:data, width:w, height:h, isArray:true};
   }
 
   function entity(vert, frag, buffer, uniforms) {
@@ -71,6 +93,21 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.generateMipmap(gl.TEXTURE_2D);
+    //gl.bindTexture(gl.TEXTURE0, null);
+    return tex;
+
+  }
+  
+  function do_array_texture (gl, img, width, height) {
+
+    var tex = gl.createTexture();
+    LOG("Created texture");
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    //gl.generateMipmap(gl.TEXTURE_2D);
     //gl.bindTexture(gl.TEXTURE0, null);
     return tex;
 
@@ -245,7 +282,14 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
               texture.id = Utils.guid();
             }
             if (!tex) {
-              tex = do_texture(gl, texture.img);
+              if (texture.isArray)
+              {
+                tex = do_array_texture(gl, texture.img, texture.width, texture.height);
+              }
+              else
+              {
+                tex = do_texture(gl, texture.img);
+              }
               model.cache.textures[texture.id] = tex;
             }
             var activeName = 'TEXTURE' + textureCounter;
