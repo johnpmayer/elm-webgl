@@ -15,7 +15,7 @@ documentation provided here.
 @docs webgl
 
 # Loading Textures
-@docs loadTexture
+@docs loadTexture, staticTexture
 
 # Unsafe Shader Creation (for library writers)
 @docs unsafeShader
@@ -74,6 +74,12 @@ other formats have not been as well-tested yet.
 -}
 loadTexture : String -> Signal (Response Texture)
 loadTexture = Native.Graphics.WebGL.loadTex
+
+{-| Loads a texture with given width and height, using the supplied function which maps
+pixel coordinates between (0,0) and (width-1, height-1) to RGBA values between 0 and 255.
+-}
+staticTexture : ((Int, Int) -> (Int, Int, Int, Int)) -> Int -> Int -> Texture
+staticTexture = Native.Graphics.WebGL.staticTex
 
 data Entity = Entity 
 
