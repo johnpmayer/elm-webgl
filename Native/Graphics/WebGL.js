@@ -116,6 +116,31 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
     for (var i = 0; i < attributes; i += 1) {
       var attribute = gl.getActiveAttrib(program, i);
       switch (attribute.type) {
+        case gl.FLOAT_VEC2:
+
+          // Might want to invert the loop
+          // to build the array buffer first
+          // and then bind each one-at-a-time
+          var data = [];
+          List.each(function(elem){
+            data.push(elem._0[attribute.name][0]);
+            data.push(elem._0[attribute.name][1]);
+            data.push(elem._1[attribute.name][0]);
+            data.push(elem._1[attribute.name][1]);
+            data.push(elem._2[attribute.name][0]);
+            data.push(elem._2[attribute.name][1]);
+          }, bufferElems);
+          var array = new Float32Array(data);
+
+          var buffer = gl.createBuffer();
+          LOG("Created attribute buffer " + attribute.name);
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+
+          buffers[attribute.name] = buffer;
+
+          break;
+
         case gl.FLOAT_VEC3:
 
           // Might want to invert the loop
@@ -132,6 +157,37 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
             data.push(elem._2[attribute.name][0]);
             data.push(elem._2[attribute.name][1]);
             data.push(elem._2[attribute.name][2]);
+          }, bufferElems);
+          var array = new Float32Array(data);
+
+          var buffer = gl.createBuffer();
+          LOG("Created attribute buffer " + attribute.name);
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+
+          buffers[attribute.name] = buffer;
+
+          break;
+
+        case gl.FLOAT_VEC4:
+
+          // Might want to invert the loop
+          // to build the array buffer first
+          // and then bind each one-at-a-time
+          var data = [];
+          List.each(function(elem){
+            data.push(elem._0[attribute.name][0]);
+            data.push(elem._0[attribute.name][1]);
+            data.push(elem._0[attribute.name][2]);
+            data.push(elem._0[attribute.name][3]);
+            data.push(elem._1[attribute.name][0]);
+            data.push(elem._1[attribute.name][1]);
+            data.push(elem._1[attribute.name][2]);
+            data.push(elem._1[attribute.name][3]);
+            data.push(elem._2[attribute.name][0]);
+            data.push(elem._2[attribute.name][1]);
+            data.push(elem._2[attribute.name][2]);
+            data.push(elem._2[attribute.name][3]);
           }, bufferElems);
           var array = new Float32Array(data);
 
@@ -278,9 +334,17 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
         var attributeBuffer = buffer.buffers[attribute.name];
 
         switch (attribute.type) {
+          case gl.FLOAT_VEC2:
+            gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
+            gl.vertexAttribPointer(attribLocation, 2, gl.FLOAT, false, 0, 0);
+            break;
           case gl.FLOAT_VEC3:
             gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
             gl.vertexAttribPointer(attribLocation, 3, gl.FLOAT, false, 0, 0);
+            break;
+          case gl.FLOAT_VEC4:
+            gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
+            gl.vertexAttribPointer(attribLocation, 4, gl.FLOAT, false, 0, 0);
             break;
           default:
             LOG("Unsupported attribute type: " + attribute.type);
