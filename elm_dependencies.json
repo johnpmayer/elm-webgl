@@ -1,5 +1,5 @@
 {
-    "version": "0.1.1",
+    "version": "0.1.2",
     "summary": "A library for general 3D rendering with WebGL",
     "description": "This library makes general 3D rendering possible in Elm. It provides the core functionality for creating models and using shaders, with the long-term goal that other libraries will build upon this basic functionality.",
     "license": "BSD3",
