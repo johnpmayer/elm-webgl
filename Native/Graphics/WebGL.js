@@ -286,8 +286,14 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
           case gl.FLOAT:
             gl.uniform1f(uniformLocation, entity.uniforms[uniform.name]);
             break;
+          case gl.FLOAT_VEC2:
+            gl.uniform2fv(uniformLocation, entity.uniforms[uniform.name]);
+            break;            
           case gl.FLOAT_VEC3:
             gl.uniform3fv(uniformLocation, entity.uniforms[uniform.name]);
+            break;
+          case gl.FLOAT_VEC4:
+            gl.uniform4fv(uniformLocation, entity.uniforms[uniform.name]);
             break;
           case gl.FLOAT_MAT4:
             gl.uniformMatrix4fv(uniformLocation, false, entity.uniforms[uniform.name]);
