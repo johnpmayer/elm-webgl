@@ -1,10 +1,10 @@
-Elm.Native.Graphics.WebGL = {};
-Elm.Native.Graphics.WebGL.make = function(elm) {
+Elm.Native.WebGL = {};
+Elm.Native.WebGL.make = function(elm) {
 
   elm.Native = elm.Native || {};
   elm.Native.Graphics = elm.Native.Graphics || {};
-  elm.Native.Graphics.WebGL = elm.Native.Graphics.WebGL || {};
-  if (elm.Native.Graphics.WebGL.values) return elm.Native.Graphics.WebGL.values;
+  elm.Native.WebGL = elm.Native.WebGL || {};
+  if (elm.Native.WebGL.values) return elm.Native.WebGL.values;
 
   // setup logging
   function LOG(msg) {
@@ -440,7 +440,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
   }
 
-  return elm.Native.Graphics.WebGL.values = {
+  return elm.Native.WebGL.values = {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
     loadTex:loadTex,
     entity:F4(entity),
