@@ -1,0 +1,17 @@
+{
+    "version": "1.0.0",
+    "summary": "A library for general 3D rendering with WebGL",
+    "repository": "https://github.com/johnpmayer/elm-webgl.git",
+    "license": "BSD3",
+    "source-directories": [
+        "src"
+    ],
+    "exposed-modules": [
+        "WebGL"
+    ],
+    "native-modules": true,
+    "dependencies": {
+        "elm-lang/core": "1.0.0 <= v < 2.0.0",
+        "johnpmayer/elm-linear-algebra": "1.0.0 <= v < 2.0.0"
+    }
+}

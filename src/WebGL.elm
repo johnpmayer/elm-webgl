@@ -24,7 +24,7 @@ documentation provided here.
 
 import Graphics.Element (Element)
 import Http (Response)
-import Native.Graphics.WebGL
+import Native.WebGL
 import Signal (Signal)
 
 {-| Triangles are the basic building blocks of a mesh. You can put them together
@@ -65,7 +65,7 @@ GLSL. It is intended specifically for libary writers who want to create shader
 combinators.
 -}
 unsafeShader : String -> Shader attribute uniform varying
-unsafeShader = Native.Graphics.WebGL.unsafeCoerceGLSL
+unsafeShader = Native.WebGL.unsafeCoerceGLSL
 
 data Texture = Texture
 
@@ -73,7 +73,7 @@ data Texture = Texture
 other formats have not been as well-tested yet.
 -}
 loadTexture : String -> Signal (Response Texture)
-loadTexture = Native.Graphics.WebGL.loadTex
+loadTexture = Native.WebGL.loadTex
 
 data Entity = Entity 
 
@@ -87,11 +87,11 @@ mesh to the GPU, it will not be resent. This means it is fairly cheap to create
 new entities if you are reusing shaders and meshes that have been used before.
 -}
 entity : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> [Triangle attributes] -> uniforms -> Entity
-entity = Native.Graphics.WebGL.entity
+entity = Native.WebGL.entity
 
 {-| Render a WebGL scene with the given dimensions and entities. Shaders and
 meshes are cached so that they do not get resent to the GPU, so it should be
 relatively cheap to create new entities out of existing values.
 -}
 webgl : (Int,Int) -> [Entity] -> Element
-webgl = Native.Graphics.WebGL.webgl
+webgl = Native.WebGL.webgl
