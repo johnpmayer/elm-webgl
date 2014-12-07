@@ -1,4 +1,4 @@
-module Graphics.WebGL where
+module WebGL where
 
 {-| The WebGL API is for high performance rendering. Definitely read about
 [how WebGL works](https://github.com/johnpmayer/elm-webgl/blob/master/README.md)
