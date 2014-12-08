@@ -8,16 +8,12 @@ GPU, meaning you can render things more quickly.
 Here are some examples so you can get a feel for the API, but make sure you
 read on to learn how WebGL and the GPU really work!
 
-<a href="http://elm-lang.org/edit/examples/WebGL/Triangle.elm">
-<img src="http://elm-lang.org/screenshot/WebGL/Triangle.jpg" width="120" height="120"></a>
-<a href="http://elm-lang.org/edit/examples/WebGL/Cube.elm">
-<img src="http://elm-lang.org/screenshot/WebGL/Cube.jpg" width="120" height="120"></a>
-<a href="http://elm-lang.org/edit/examples/WebGL/Crate.elm">
-<img src="http://elm-lang.org/screenshot/WebGL/Crate.jpg" width="120" height="120"></a>
-<a href="http://elm-lang.org/edit/examples/WebGL/Thwomp.elm">
-<img src="http://elm-lang.org/screenshot/WebGL/Thwomp.jpg" width="120" height="120"></a>
-<a href="http://elm-lang.org/edit/examples/WebGL/FirstPerson.elm">
-<img src="http://elm-lang.org/screenshot/WebGL/FirstPerson.jpg" width="120" height="120"></a>
+[![Triangle](http://elm-lang.org/screenshot/WebGL/Triangle.jpg)](http://elm-lang.org/edit/examples/WebGL/Triangle.elm)
+[![Cube](http://elm-lang.org/screenshot/WebGL/Cube.jpg)](http://elm-lang.org/edit/examples/WebGL/Cube.elm)
+[![Crate](http://elm-lang.org/screenshot/WebGL/Crate.jpg)](http://elm-lang.org/edit/examples/WebGL/Crate.elm)
+[![Thwomp](http://elm-lang.org/screenshot/WebGL/Thwomp.jpg)](http://elm-lang.org/edit/examples/WebGL/Thwomp.elm)
+[![FirstPerson](http://elm-lang.org/screenshot/WebGL/FirstPerson.jpg)](http://elm-lang.org/edit/examples/WebGL/FirstPerson.elm)
+
 
 ## Understanding WebGL
 
@@ -64,7 +60,7 @@ be and all of the meshes loaded onto the GPU will be transformed accordingly.
 The following diagram illustrates the entire pipeline. Keep reading past the
 diagram, all the terms will be explained!
 
-![WebGL Pipeline](/pipeline.png)
+![WebGL Pipeline](https://raw.githubusercontent.com/johnpmayer/elm-webgl/master/pipeline.png)
 
 We start with a mesh. It's a bunch of raw data points that we want to render on
 screen. From there, the data flows through two types of shaders:
