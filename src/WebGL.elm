@@ -6,7 +6,7 @@ and look at some examples before trying to do too much with just the
 documentation provided here.
 
 # Triangles
-@docs Triangle, mapTriangle, zipTriangle
+@docs Triangle, map, map2
 
 # Entities
 @docs entity
@@ -43,16 +43,16 @@ type alias Triangle attributes =
 {-| Apply a function to each vertex. This lets you transform the set of
 attributes associated with each corner of a triangle.
 -}
-mapTriangle : (a -> b) -> Triangle a -> Triangle b
-mapTriangle f (x,y,z) =
+map : (a -> b) -> Triangle a -> Triangle b
+map f (x,y,z) =
     (f x, f y, f z)
 
 
 {-| Combine two triangles by putting each of their vertices together with
 a given function.
 -}
-zipTriangle : (a -> b -> c) -> Triangle a -> Triangle b -> Triangle c
-zipTriangle f (x,y,z) (x',y',z') =
+map2 : (a -> b -> c) -> Triangle a -> Triangle b -> Triangle c
+map2 f (x,y,z) (x',y',z') =
     (f x x', f y y', f z z')
 
 
