@@ -423,6 +423,7 @@ Elm.Native.WebGL.make = function(elm) {
 
       div.appendChild(canvas);
 
+      return div;
     }
 
     var elem = {
