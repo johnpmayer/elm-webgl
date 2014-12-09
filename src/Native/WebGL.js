@@ -4,14 +4,16 @@ Elm.Native.WebGL.make = function(elm) {
   elm.Native = elm.Native || {};
   elm.Native.Graphics = elm.Native.Graphics || {};
   elm.Native.WebGL = elm.Native.WebGL || {};
-  if (elm.Native.WebGL.values) return elm.Native.WebGL.values;
+  if (elm.Native.WebGL.values) {
+      return elm.Native.WebGL.values;
+  }
 
   // setup logging
   function LOG(msg) {
     // console.log(msg);
   }
 
-  var newNode = ElmRuntime.use(ElmRuntime.Render.Utils).newElement;
+  var createNode = Elm.Native.Graphics.Element.make(elm).createNode;
   var newElement = Elm.Graphics.Element.make(elm).newElement;
 
   var List = Elm.Native.List.make(elm);
@@ -373,9 +375,9 @@ Elm.Native.WebGL.make = function(elm) {
 
     function render(model) {
 
-      var div = newNode('div');
+      var div = createNode('div');
       div.style.overflow = 'hidden';
-      var canvas = newNode('canvas');
+      var canvas = createNode('canvas');
       var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
       if (gl) {
