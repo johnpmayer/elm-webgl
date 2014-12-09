@@ -124,7 +124,7 @@ Elm.Native.WebGL.make = function(elm) {
           // to build the array buffer first
           // and then bind each one-at-a-time
           var data = [];
-          List.each(function(elem){
+          List.map(function(elem){
             data.push(elem._0[attribute.name][0]);
             data.push(elem._0[attribute.name][1]);
             data.push(elem._1[attribute.name][0]);
@@ -149,7 +149,7 @@ Elm.Native.WebGL.make = function(elm) {
           // to build the array buffer first
           // and then bind each one-at-a-time
           var data = [];
-          List.each(function(elem){
+          List.map(function(elem){
             data.push(elem._0[attribute.name][0]);
             data.push(elem._0[attribute.name][1]);
             data.push(elem._0[attribute.name][2]);
@@ -177,7 +177,7 @@ Elm.Native.WebGL.make = function(elm) {
           // to build the array buffer first
           // and then bind each one-at-a-time
           var data = [];
-          List.each(function(elem){
+          List.map(function(elem){
             data.push(elem._0[attribute.name][0]);
             data.push(elem._0[attribute.name][1]);
             data.push(elem._0[attribute.name][2]);
@@ -364,7 +364,7 @@ Elm.Native.WebGL.make = function(elm) {
 
     }
 
-    List.each(drawEntity, model.models);
+    List.map(drawEntity, model.models);
 
   }
 
