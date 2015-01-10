@@ -17,7 +17,6 @@ Elm.Native.WebGL.make = function(elm) {
   var newElement = Elm.Graphics.Element.make(elm).newElement;
 
   var List = Elm.Native.List.make(elm);
-  var MJS = Elm.Native.MJS.make(elm);
   var Utils = Elm.Native.Utils.make(elm);
   var Signal = Elm.Signal.make(elm);
   var Tuple2 = Utils.Tuple2;

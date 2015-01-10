@@ -12,6 +12,6 @@
     "native-modules": true,
     "dependencies": {
         "elm-lang/core": "1.0.0 <= v < 2.0.0",
-        "johnpmayer/elm-linear-algebra": "1.0.0 <= v < 2.0.0"
+        "johnpmayer/elm-linear-algebra": "2.0.0 <= v < 3.0.0"
     }
 }
