@@ -88,7 +88,15 @@ loadTexture =
   Native.WebGL.loadTex
 
 
-type Entity = Entity 
+{-| Return the (width, height) size of a texture. Useful for sprite sheets
+or other times you may want to use only a potion of a texture image.
+-}
+textureSize : Texture -> (Int, Int)
+textureSize =
+    Native.WebGL.textureSize
+
+
+type Entity = Entity
 
 
 {-| Packages a vertex shader, a fragment shader, a mesh, and uniform variables
