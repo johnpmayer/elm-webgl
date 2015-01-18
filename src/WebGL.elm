@@ -15,7 +15,7 @@ documentation provided here.
 @docs webgl
 
 # Loading Textures
-@docs loadTexture
+@docs loadTexture, textureSize
 
 # Unsafe Shader Creation (for library writers)
 @docs unsafeShader
