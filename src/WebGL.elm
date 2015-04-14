@@ -22,11 +22,11 @@ documentation provided here.
 
 -}
 
-import Graphics.Element (Element)
-import Http (Response)
+import Graphics.Element exposing (Element)
+import Http exposing (defaultSettings, empty, RawError, Response, send)
 import Native.WebGL
-import Signal (Signal)
-
+import Signal exposing (Mailbox)
+import Task exposing (andThen, Task)
 
 {-| Triangles are the basic building blocks of a mesh. You can put them together
 to form any shape. Each corner of a triangle is called a *vertex* and contains a
@@ -83,10 +83,13 @@ type Texture = Texture
 {-| Loads a texture from the given url. PNG and JPEG are known to work, but
 other formats have not been as well-tested yet.
 -}
-loadTexture : String -> Signal (Response Texture)
-loadTexture =
-  Native.WebGL.loadTex
+loadTexture : String -> Task RawError Texture
+loadTexture url = 
+  let request = { verb = "GET", headers = [], url = url, body = empty }
+  in send defaultSettings request `andThen` decodeTexture
 
+decodeTexture : Response -> Task RawError Texture
+decodeTexture = Native.WebGL.decodeTexture
 
 type Entity = Entity 
 
