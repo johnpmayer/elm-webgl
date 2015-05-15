@@ -14,41 +14,37 @@ Elm.Native.WebGL.make = function(elm) {
   }
 
   var createNode = Elm.Native.Graphics.Element.make(elm).createNode;
-  var newElement = Elm.Native.Graphics.Element.make(elm).newElement;
+  var newElement = Elm.Graphics.Element.make(elm).newElement;
 
-  var List   = Elm.List.make(elm);
-  var Utils  = Elm.Native.Utils.make(elm);
+  var List = Elm.Native.List.make(elm);
+  var Utils = Elm.Native.Utils.make(elm);
   var Signal = Elm.Signal.make(elm);
   var Tuple2 = Utils.Tuple2;
-  var Task   = Elm.Native.Task.make(elm);
 
   function unsafeCoerceGLSL(src) {
     return { src : src };
   }
 
-  function toTexture(req) {
-    var img  = new Image();
-    img.src = URL.createObjectURL(req.response);
-    return {img:img};
-  };
+  function loadTex(source) {
 
-  function loadTexture(url) {
-    return Task.asyncFunction(function(callback) {
-      var req = new XMLHttpRequest;
-      req.addEventListener('error', function() {
-        return callback(Task.fail({ ctor: 'NetworkError' }));
-      });
-      req.addEventListener('timeout', function() {
-        return callback(Task.fail({ ctor: 'Timeout' }));
-      });
-      req.addEventListener('load', function() {
-        return callback(Task.succeed(toTexture(req)));
-      });
-      req.open('get', url, true);
-      req.timeout = 30;
-      req.responseType = 'blob';
-      req.send();
-    });
+    var response = Signal.constant(elm.Http.values.Waiting);
+
+    var img = new Image();
+
+    img.onload = function() {
+      var success = elm.Http.values.Success({img:img});
+      elm.notify(response.id, success);
+    }
+
+    img.onerror = function(e) {
+      var failure = A2(elm.Http.values.Failure,0,"Failed");
+      elm.notify(response.id, failure);
+    }
+
+    img.src = source;
+
+    return response;
+
   }
 
   function entity(vert, frag, buffer, uniforms) {
@@ -213,10 +209,7 @@ Elm.Native.WebGL.make = function(elm) {
     }
 
     var numIndices = 3 * List.length(bufferElems);
-    var indices = [];
-    for (var i = 0; i < numIndices; i += 1) {
-      indices.push(i);
-    }
+    var indices = List.toArray(List.range(0, numIndices - 1));
     LOG("Created index buffer");
     var indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -238,7 +231,6 @@ Elm.Native.WebGL.make = function(elm) {
 
     gl.viewport(0, 0, model.w, model.h);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
     LOG("Drawing");
 
     function drawEntity(entity) {
@@ -452,7 +444,7 @@ Elm.Native.WebGL.make = function(elm) {
 
   return elm.Native.WebGL.values = {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
-    loadTexture:loadTexture,
+    loadTex:loadTex,
     entity:F4(entity),
     webgl:F2(webgl)
   };

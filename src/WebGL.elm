@@ -79,16 +79,17 @@ unsafeShader =
 
 type Texture = Texture
 
-type Error =
-    NetworkError
-  | Timeout
 
 {-| Loads a texture from the given url. PNG and JPEG are known to work, but
 other formats have not been as well-tested yet.
 -}
-loadTexture : String -> Task Error Texture
-loadTexture url =
-  Native.WebGL.loadTexture url
+loadTexture : String -> Task RawError Texture
+loadTexture url = 
+  let request = { verb = "GET", headers = [], url = url, body = empty }
+  in send defaultSettings request `andThen` decodeTexture
+
+decodeTexture : Response -> Task RawError Texture
+decodeTexture = Native.WebGL.decodeTexture
 
 type Entity = Entity 
 
