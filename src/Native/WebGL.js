@@ -26,28 +26,16 @@ Elm.Native.WebGL.make = function(elm) {
     return { src : src };
   }
 
-  function toTexture(req) {
-    var img  = new Image();
-    img.src = URL.createObjectURL(req.response);
-    return {img:img};
-  };
-
-  function loadTexture(url) {
+  function loadTexture(source) {
     return Task.asyncFunction(function(callback) {
-      var req = new XMLHttpRequest;
-      req.addEventListener('error', function() {
-        return callback(Task.fail({ ctor: 'NetworkError' }));
-      });
-      req.addEventListener('timeout', function() {
-        return callback(Task.fail({ ctor: 'Timeout' }));
-      });
-      req.addEventListener('load', function() {
-        return callback(Task.succeed(toTexture(req)));
-      });
-      req.open('get', url, true);
-      req.timeout = 30;
-      req.responseType = 'blob';
-      req.send();
+      var img = new Image();
+      img.onload = function() {
+        return callback(Task.succeed({img:img}));
+      };
+      img.onerror = function(e) {
+        return callback(Task.fail({ ctor: 'Error' }));
+      };
+      img.src = source;
     });
   }
 
@@ -238,7 +226,6 @@ Elm.Native.WebGL.make = function(elm) {
 
     gl.viewport(0, 0, model.w, model.h);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
     LOG("Drawing");
 
     function drawEntity(entity) {

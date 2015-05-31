@@ -23,10 +23,8 @@ documentation provided here.
 -}
 
 import Graphics.Element exposing (Element)
-import Http exposing (defaultSettings, empty, RawError, Response, send)
 import Native.WebGL
-import Signal exposing (Mailbox)
-import Task exposing (andThen, Task)
+import Task exposing (Task)
 
 {-| Triangles are the basic building blocks of a mesh. You can put them together
 to form any shape. Each corner of a triangle is called a *vertex* and contains a
@@ -80,8 +78,7 @@ unsafeShader =
 type Texture = Texture
 
 type Error =
-    NetworkError
-  | Timeout
+    Error
 
 {-| Loads a texture from the given url. PNG and JPEG are known to work, but
 other formats have not been as well-tested yet.
