@@ -39,7 +39,7 @@ Elm.Native.WebGL.make = function(elm) {
     });
   }
 
-  function entity(vert, frag, buffer, uniforms) {
+  function entity(primitive, vert, frag, buffer, uniforms) {
 
     if (!buffer.guid) {
       buffer.guid = Utils.guid();
@@ -49,10 +49,15 @@ Elm.Native.WebGL.make = function(elm) {
       vert: vert,
       frag: frag,
       buffer: buffer,
-      uniforms: uniforms
+      uniforms: uniforms,
+      primitive: primitive
     };
 
   }
+
+  function trianglesEntity(v, f, b, u) { return entity("TRIANGLES", v, f, b, u); }
+  function linesEntity(v, f, b, u) { return entity("LINES", v, f, b, u); }
+  function pointsEntity(v, f, b, u) { return entity("POINTS", v, f, b, u); }
 
   function do_texture (gl, img) {
 
@@ -101,106 +106,62 @@ Elm.Native.WebGL.make = function(elm) {
 
   }
 
-  function do_bind (gl, program, bufferElems) {
+  function pusher_function(data, name, n_elems_tuple, n_dims) {
+    f = "(function(elem) { ";
+    if(n_elems_tuple === 1) {
+      for(var d=0; d<n_dims; d++)
+        f += "data.push(elem[name][" + d + "]); ";
+    } else {
+      for(var i=0; i<n_elems_tuple; i++)
+        for(var d=0; d<n_dims; d++)
+         f += "data.push(elem._" + i + "[name][" + d + "]); ";
+    }
+    f += "})"
+    return eval(f);
+  }
+
+  function do_bind (gl, program, bufferElems, primitive) {
 
     var buffers = {};
+
+    var n_elems_tuple;
+    switch (primitive) {
+      case gl.POINTS:    n_elems_tuple = 1; break;
+      case gl.LINES:     n_elems_tuple = 2; break;
+      case gl.TRIANGLES: n_elems_tuple = 3; break;
+      default: LOG("Bad primitive type"); break;
+    }
 
     var attributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
     for (var i = 0; i < attributes; i += 1) {
       var attribute = gl.getActiveAttrib(program, i);
+      var n_dims;
       switch (attribute.type) {
-        case gl.FLOAT_VEC2:
-
-          // Might want to invert the loop
-          // to build the array buffer first
-          // and then bind each one-at-a-time
-          var data = [];
-          A2(List.map, function(elem){
-            data.push(elem._0[attribute.name][0]);
-            data.push(elem._0[attribute.name][1]);
-            data.push(elem._1[attribute.name][0]);
-            data.push(elem._1[attribute.name][1]);
-            data.push(elem._2[attribute.name][0]);
-            data.push(elem._2[attribute.name][1]);
-          }, bufferElems);
-          var array = new Float32Array(data);
-
-          var buffer = gl.createBuffer();
-          LOG("Created attribute buffer " + attribute.name);
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
-
-          buffers[attribute.name] = buffer;
-
-          break;
-
-        case gl.FLOAT_VEC3:
-
-          // Might want to invert the loop
-          // to build the array buffer first
-          // and then bind each one-at-a-time
-          var data = [];
-          A2(List.map, function(elem){
-            data.push(elem._0[attribute.name][0]);
-            data.push(elem._0[attribute.name][1]);
-            data.push(elem._0[attribute.name][2]);
-            data.push(elem._1[attribute.name][0]);
-            data.push(elem._1[attribute.name][1]);
-            data.push(elem._1[attribute.name][2]);
-            data.push(elem._2[attribute.name][0]);
-            data.push(elem._2[attribute.name][1]);
-            data.push(elem._2[attribute.name][2]);
-          }, bufferElems);
-          var array = new Float32Array(data);
-
-          var buffer = gl.createBuffer();
-          LOG("Created attribute buffer " + attribute.name);
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
-
-          buffers[attribute.name] = buffer;
-
-          break;
-
-        case gl.FLOAT_VEC4:
-
-          // Might want to invert the loop
-          // to build the array buffer first
-          // and then bind each one-at-a-time
-          var data = [];
-          A2(List.map, function(elem){
-            data.push(elem._0[attribute.name][0]);
-            data.push(elem._0[attribute.name][1]);
-            data.push(elem._0[attribute.name][2]);
-            data.push(elem._0[attribute.name][3]);
-            data.push(elem._1[attribute.name][0]);
-            data.push(elem._1[attribute.name][1]);
-            data.push(elem._1[attribute.name][2]);
-            data.push(elem._1[attribute.name][3]);
-            data.push(elem._2[attribute.name][0]);
-            data.push(elem._2[attribute.name][1]);
-            data.push(elem._2[attribute.name][2]);
-            data.push(elem._2[attribute.name][3]);
-          }, bufferElems);
-          var array = new Float32Array(data);
-
-          var buffer = gl.createBuffer();
-          LOG("Created attribute buffer " + attribute.name);
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
-
-          buffers[attribute.name] = buffer;
-
-          break;
-
-        default:
-          LOG("Bad buffer type");
-          break;
+        case gl.FLOAT_VEC2: n_dims = 2; break;
+        case gl.FLOAT_VEC3: n_dims = 3; break;
+        case gl.FLOAT_VEC4: n_dims = 4; break;
+        default: LOG("Bad buffer type"); break;
       }
 
+      // Might want to invert the loop
+      // to build the array buffer first
+      // and then bind each one-at-a-time
+      var data = [];
+      A2(List.map,
+         pusher_function(data, attribute.name, n_elems_tuple, n_dims),
+         bufferElems);
+      var array = new Float32Array(data);
+      console.log(array);
+
+      var buffer = gl.createBuffer();
+      LOG("Created attribute buffer " + attribute.name);
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+
+      buffers[attribute.name] = buffer;
     }
 
-    var numIndices = 3 * List.length(bufferElems);
+    var numIndices = n_elems_tuple * List.length(bufferElems);
     var indices = [];
     for (var i = 0; i < numIndices; i += 1) {
       indices.push(i);
@@ -320,7 +281,7 @@ Elm.Native.WebGL.make = function(elm) {
 
       var buffer = model.cache.buffers[entity.buffer.guid];
       if (!buffer) {
-        buffer = do_bind(gl, program, entity.buffer);
+        buffer = do_bind(gl, program, entity.buffer, gl[entity.primitive]);
         model.cache.buffers[entity.buffer.guid] = buffer;
       }
 
@@ -354,7 +315,7 @@ Elm.Native.WebGL.make = function(elm) {
         }
       }
 
-      gl.drawElements(gl.TRIANGLES, numIndices, gl.UNSIGNED_SHORT, 0);
+      gl.drawElements(gl[entity.primitive], numIndices, gl.UNSIGNED_SHORT, 0);
 
     }
 
@@ -438,10 +399,12 @@ Elm.Native.WebGL.make = function(elm) {
   }
 
   return elm.Native.WebGL.values = {
-    unsafeCoerceGLSL:unsafeCoerceGLSL,
-    loadTexture:loadTexture,
-    entity:F4(entity),
-    webgl:F2(webgl)
+    unsafeCoerceGLSL: unsafeCoerceGLSL,
+    loadTexture: loadTexture,
+    trianglesEntity: F4(trianglesEntity),
+    linesEntity: F4(linesEntity),
+    pointsEntity: F4(pointsEntity),
+    webgl: F2(webgl),
   };
 
 };
