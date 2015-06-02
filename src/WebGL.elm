@@ -15,7 +15,7 @@ documentation provided here.
 @docs webgl
 
 # Loading Textures
-@docs loadTexture
+@docs loadTexture, loadTextureRaw
 
 # Unsafe Shader Creation (for library writers)
 @docs unsafeShader
@@ -75,7 +75,12 @@ unsafeShader =
   Native.WebGL.unsafeCoerceGLSL
 
 
-type Texture = Texture
+{-| A `Texture` loads a texture with linear filtering enabled. If you do not
+want filtering, create a `RawTexture` with `loadTextureRaw`.
+-}
+type Texture =
+    RawTexture
+  | Texture
 
 type Error =
     Error
@@ -86,6 +91,10 @@ other formats have not been as well-tested yet.
 loadTexture : String -> Task Error Texture
 loadTexture url =
   Native.WebGL.loadTexture url
+
+loadTextureRaw : String -> Task Error Texture
+loadTextureRaw url =
+  Native.WebGL.loadTextureRaw url
 
 type Entity = Entity 
 
