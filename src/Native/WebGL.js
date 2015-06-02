@@ -10,7 +10,7 @@ Elm.Native.WebGL.make = function(elm) {
 
   // setup logging
   function LOG(msg) {
-    console.log(msg);
+    // console.log(msg);
   }
 
   var createNode = Elm.Native.Graphics.Element.make(elm).createNode;
