@@ -120,7 +120,7 @@ used language for shaders with [websites](https://www.shadertoy.com) devoted
 to sharing creative demos, so you will often be able to use that shader
 code directly in Elm. A basic vertex shader could be defined like this:
 
-```
+```elm
 vertexShader : Shader { position:Vec3, coord:Vec3 } { u | view:Mat4 } { vcoord:Vec2 }
 vertexShader = [glsl|
 
