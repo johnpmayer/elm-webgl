@@ -26,33 +26,29 @@ import Graphics.Element exposing (Element)
 import Native.WebGL
 import Task exposing (Task)
 
-{-| Triangles are the basic building blocks of a mesh. You can put them together
+{-| 
+WebGl has a number of rendering modes available. Each of the tagged union types 
+maps to a separate rendering mode. 
+
+Triangles are the basic building blocks of a mesh. You can put them together
 to form any shape. Each corner of a triangle is called a *vertex* and contains a
 bunch of *attributes* that describe that particular corner. These attributes can
 be things like position and color.
 
 So when you create a `Triangle` you are really providing three sets of attributes
 that describe the corners of a triangle.
+
+See: [Library reference](https://msdn.microsoft.com/en-us/library/dn302395(v=vs.85).aspx) for the description of each type. 
 -}
-type alias Triangle attributes =
-    (attributes, attributes, attributes)
 
-
-{-| Apply a function to each vertex. This lets you transform the set of
-attributes associated with each corner of a triangle.
--}
-map : (a -> b) -> Triangle a -> Triangle b
-map f (x,y,z) =
-    (f x, f y, f z)
-
-
-{-| Combine two triangles by putting each of their vertices together with
-a given function.
--}
-map2 : (a -> b -> c) -> Triangle a -> Triangle b -> Triangle c
-map2 f (x,y,z) (x',y',z') =
-    (f x x', f y y', f z z')
-
+type RenderableType attributes
+  = Triangle (List (attributes, attributes, attributes))
+  | Lines (List (attributes, attributes) )
+  | LineStrip (List attributes)
+  | LineLoop (List attributes)
+  | Points (List attributes)
+  | TriangleFan (List attributes)
+  | TriangleStrip (List attributes)
 
 {-| Shader is a phantom data type. Don't instantiate it yourself. See below.
 -}
@@ -99,7 +95,7 @@ Values will be cached intelligently, so if you have already sent a shader or
 mesh to the GPU, it will not be resent. This means it is fairly cheap to create
 new entities if you are reusing shaders and meshes that have been used before.
 -}
-entity : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> List (Triangle attributes) -> uniforms -> Entity
+entity : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> (RenderableType attributes) -> uniforms -> Entity
 entity =
   Native.WebGL.entity
 
