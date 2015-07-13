@@ -10,7 +10,7 @@ Elm.Native.WebGL.make = function(elm) {
 
   // setup logging
   function LOG(msg) {
-    //console.log(msg);
+    // console.log(msg);
   }
 
   var createNode = Elm.Native.Graphics.Element.make(elm).createNode;
@@ -79,9 +79,7 @@ Elm.Native.WebGL.make = function(elm) {
     var compile = gl.COMPILE_STATUS;
     if (!gl.getShaderParameter(shader,compile)) {
       throw gl.getShaderInfoLog(shader);
-    } else {
-		LOG(gl.getShaderInfoLog(shader)); 
-	}
+    }
 
     return shader;
 
@@ -121,6 +119,10 @@ Elm.Native.WebGL.make = function(elm) {
 			case gl.FLOAT_VEC2: return { size: 2, type: Float32Array, baseType: gl.FLOAT };
 			case gl.FLOAT_VEC3: return { size: 3, type: Float32Array, baseType: gl.FLOAT };
 			case gl.FLOAT_VEC4: return { size: 4, type: Float32Array, baseType: gl.FLOAT };			
+			case gl.INT: 		return { size: 1, type: Int32Array, baseType: gl.INT };
+			case gl.INT_VEC2: 	return { size: 2, type: Int32Array, baseType: gl.INT };
+			case gl.INT_VEC3: 	return { size: 3, type: Int32Array, baseType: gl.INT };
+			case gl.INT_VEC4: 	return { size: 4, type: Int32Array, baseType: gl.INT };			
 		}
 	  };
   
@@ -128,15 +130,15 @@ Elm.Native.WebGL.make = function(elm) {
 	var idxKeys = []; 
 	for(var i = 0;i < elem_length;i++) idxKeys.push('_'+i); 
 	
-	function dataFill(data, elem, cnt) {				
-			if(elem_length == 1)
-				for(var i = 0;i < cnt;i++)
-					data.push(cnt === 1 ? elem[attribute.name] : elem[attribute.name][i]);			
-			else
-				idxKeys.forEach( function(idx) {
-					for(var i = 0;i < cnt;i++) 
-						data.push(cnt === 1 ? elem[idx][attribute.name] : elem[idx][attribute.name][i]);						
-				}); 		
+	function dataFill(data, cnt, fillOffset, elem, key) {						
+		if(elem_length == 1)
+			for(var i = 0;i < cnt;i++)
+				data[fillOffset++] = cnt === 1 ? elem[key] : elem[key][i];			
+		else
+			idxKeys.forEach( function(idx) {
+				for(var i = 0;i < cnt;i++) 
+					data[fillOffset++] = (cnt === 1 ? elem[idx][key] : elem[idx][key][i]);						
+			}); 		
 	};
 	
 	var buffers = {};
@@ -150,11 +152,14 @@ Elm.Native.WebGL.make = function(elm) {
 		throw error("No info available for: " + attribute.type); 
 	  }
 	  
-	  var data = [];
-	  A2(List.map, function(elem){
-			dataFill(data, elem, attributeInfo.size); 				
+	  var data_idx = 0; 
+	  var array = new attributeInfo.type( List.length(bufferElems) * attributeInfo.size );
+	  	  
+	  A2(List.map, function(elem) {
+		dataFill(array, attributeInfo.size, data_idx, elem, attribute.name); 
+		data_idx += attributeInfo.size;
 	  }, bufferElems);
-	  var array = new attributeInfo.type(data);
+	  
 
 	  var buffer = gl.createBuffer();
 	  LOG("Created attribute buffer " + attribute.name);
@@ -283,7 +288,6 @@ Elm.Native.WebGL.make = function(elm) {
         }
       }
 	  var entityType = get_entity_info(gl, entity.buffer.ctor); 
-	  
       var buffer = model.cache.buffers[entity.buffer.guid];
       if (!buffer) {
         buffer = do_bind(gl, program, entity.buffer._0, entityType.elemSize);
@@ -295,7 +299,6 @@ Elm.Native.WebGL.make = function(elm) {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 
       var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-	  
       for (var i = 0; i < numAttributes; i += 1) {
         var attribute = gl.getActiveAttrib(program, i);
         var attribLocation = gl.getAttribLocation(program, attribute.name);
@@ -326,7 +329,7 @@ Elm.Native.WebGL.make = function(elm) {
       div.style.overflow = 'hidden';
       var canvas = createNode('canvas');
       var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-		
+
       if (gl) {
         gl.enable(gl.DEPTH_TEST);
       } else {
@@ -334,7 +337,7 @@ Elm.Native.WebGL.make = function(elm) {
           '<div style="display: table-cell; text-align: center; width: ' + w + 'px; height: ' + h +
           'px; vertical-align: middle;"><a href="http://get.webgl.org/">Enable WebGL</a> to see this content!</div>';
       }
-	  
+
       model.cache.gl = gl;
       model.cache.canvas = canvas;
       model.cache.shaders = [];
