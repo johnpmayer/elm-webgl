@@ -153,32 +153,30 @@ Elm.Native.WebGL.make = function(elm) {
 	  }
 	  
 	  var data_idx = 0; 
-	  var array = new attributeInfo.type( List.length(bufferElems) * attributeInfo.size );
+	  var array = new attributeInfo.type( List.length(bufferElems) * attributeInfo.size * elem_length);
 	  	  
 	  A2(List.map, function(elem) {
 		dataFill(array, attributeInfo.size, data_idx, elem, attribute.name); 
-		data_idx += attributeInfo.size;
+		data_idx += attributeInfo.size * elem_length;
 	  }, bufferElems);
 	  
-
 	  var buffer = gl.createBuffer();
 	  LOG("Created attribute buffer " + attribute.name);
 	  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 	  gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
-
+      buffer.length = List.length(bufferElems) * attributeInfo.size * elem_length; 
 	  buffers[attribute.name] = buffer;
-
     }
 
     var numIndices = elem_length * List.length(bufferElems);
-    var indices = [];
+    var indices = new Uint16Array(numIndices);
     for (var i = 0; i < numIndices; i += 1) {
-      indices.push(i);
+      indices[i] = i; 
     }
     LOG("Created index buffer");
     var indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
     var bufferObject = {
       numIndices: numIndices,
@@ -309,7 +307,6 @@ Elm.Native.WebGL.make = function(elm) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
 		gl.vertexAttribPointer(attribLocation, attributeInfo.size, attributeInfo.baseType, false, 0, 0);
       }
-
       gl.drawElements(entityType.mode, numIndices, gl.UNSIGNED_SHORT, 0);
 
     }
