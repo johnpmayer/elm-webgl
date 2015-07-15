@@ -125,49 +125,69 @@ Elm.Native.WebGL.make = function(elm) {
 			case gl.INT_VEC4: 	return { size: 4, type: Int32Array, baseType: gl.INT };			
 		}
 	  };
-  
-  function do_bind (gl, program, bufferElems, elem_length) {
-	var idxKeys = []; 
-	for(var i = 0;i < elem_length;i++) idxKeys.push('_'+i); 
-	
-	function dataFill(data, cnt, fillOffset, elem, key) {						
-		if(elem_length == 1)
-			for(var i = 0;i < cnt;i++)
-				data[fillOffset++] = cnt === 1 ? elem[key] : elem[key][i];			
-		else
-			idxKeys.forEach( function(idx) {
-				for(var i = 0;i < cnt;i++) 
-					data[fillOffset++] = (cnt === 1 ? elem[idx][key] : elem[idx][key][i]);						
-			}); 		
-	};
-	
-	var buffers = {};
+      
+  /**
+        Form the buffer for a given attribute. 
+        
+        @param gl gl context
+        @param attribute the attribute to bind to. We use its name to grab the record by name and also to know
+                how many elements we need to grab.
+        @param bufferElems The list coming in from elm. 
+        @param elem_length The length of the number of vertices that complete one 'thing' based on the drawing mode. 
+            ie, 2 for Lines, 3 for Triangles, etc. 
+  */
+  function do_bind_attribute (gl, attribute, bufferElems, elem_length) {      
+    var idxKeys = []; 
+    for(var i = 0;i < elem_length;i++) idxKeys.push('_'+i); 
 
-    var attributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-    for (var i = 0; i < attributes; i += 1) {
-      var attribute = gl.getActiveAttrib(program, i);	   	
-	  var attributeInfo = get_attribute_info(gl, attribute.type); 
-	  
-	  if(attributeInfo === undefined) {
-		throw error("No info available for: " + attribute.type); 
-	  }
-	  
-	  var data_idx = 0; 
-	  var array = new attributeInfo.type( List.length(bufferElems) * attributeInfo.size * elem_length);
-	  	  
-	  A2(List.map, function(elem) {
-		dataFill(array, attributeInfo.size, data_idx, elem, attribute.name); 
-		data_idx += attributeInfo.size * elem_length;
-	  }, bufferElems);
-	  
-	  var buffer = gl.createBuffer();
-	  LOG("Created attribute buffer " + attribute.name);
-	  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-	  gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
-      buffer.length = List.length(bufferElems) * attributeInfo.size * elem_length; 
-	  buffers[attribute.name] = buffer;
+    function dataFill(data, cnt, fillOffset, elem, key) {						
+        if(elem_length == 1)
+            for(var i = 0;i < cnt;i++)
+                data[fillOffset++] = cnt === 1 ? elem[key] : elem[key][i];			
+        else
+            idxKeys.forEach( function(idx) {
+                for(var i = 0;i < cnt;i++) 
+                    data[fillOffset++] = (cnt === 1 ? elem[idx][key] : elem[idx][key][i]);						
+            }); 		
+    };
+
+    var attributeInfo = get_attribute_info(gl, attribute.type); 
+
+    if(attributeInfo === undefined) {
+        throw error("No info available for: " + attribute.type); 
     }
 
+    var data_idx = 0; 
+    var array = new attributeInfo.type( List.length(bufferElems) * attributeInfo.size * elem_length);
+      
+    A2(List.map, function(elem) {
+        dataFill(array, attributeInfo.size, data_idx, elem, attribute.name); 
+        data_idx += attributeInfo.size * elem_length;
+    }, bufferElems);
+
+    var buffer = gl.createBuffer();
+    LOG("Created attribute buffer " + attribute.name);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+    return buffer; 
+  };
+  
+  /**
+    This sets up the binding cacheing buffers. 
+    
+    We don't actually bind any buffers now except for the indices buffer, which we fill with 0..n. The problem
+    with filling the buffers here is that it is possible to have a buffer shared between two webgl shaders; which
+    could have different active attributes. If we bind it here against a particular program, we might not bind 
+    them all. That final bind is now done right before drawing. 
+    
+    @param gl gl context
+    @param bufferElems The list coming in from elm. 
+    @param elem_length The length of the number of vertices that complete one 'thing' based on the drawing mode. 
+            ie, 2 for Lines, 3 for Triangles, etc. 
+  */
+  function do_bind_setup (gl, bufferElems, elem_length) {
+	var buffers = {};
+    
     var numIndices = elem_length * List.length(bufferElems);
     var indices = new Uint16Array(numIndices);
     for (var i = 0; i < numIndices; i += 1) {
@@ -197,7 +217,9 @@ Elm.Native.WebGL.make = function(elm) {
     LOG("Drawing");
 
     function drawEntity(entity) {
-
+      if(List.length(entity.buffer._0) === 0)
+          return;
+      
       var program;
       if (entity.vert.id && entity.frag.id) {
         var progid = entity.vert.id + '#' + entity.frag.id;
@@ -287,8 +309,9 @@ Elm.Native.WebGL.make = function(elm) {
       }
 	  var entityType = get_entity_info(gl, entity.buffer.ctor); 
       var buffer = model.cache.buffers[entity.buffer.guid];
+      
       if (!buffer) {
-        buffer = do_bind(gl, program, entity.buffer._0, entityType.elemSize);
+        buffer = do_bind_setup(gl, entity.buffer._0, entityType.elemSize);
         model.cache.buffers[entity.buffer.guid] = buffer;
       }
 
@@ -297,11 +320,17 @@ Elm.Native.WebGL.make = function(elm) {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 
       var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+        
       for (var i = 0; i < numAttributes; i += 1) {
         var attribute = gl.getActiveAttrib(program, i);
+        
         var attribLocation = gl.getAttribLocation(program, attribute.name);
         gl.enableVertexAttribArray(attribLocation);
-        var attributeBuffer = buffer.buffers[attribute.name];
+                
+        if(buffer.buffers[attribute.name] === undefined) {                 
+            buffer.buffers[attribute.name] = do_bind_attribute (gl, attribute, entity.buffer._0, entityType.elemSize);
+        }
+        var attributeBuffer = buffer.buffers[attribute.name];         
 		var attributeInfo = get_attribute_info(gl, attribute.type); 
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
