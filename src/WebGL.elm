@@ -12,7 +12,7 @@ documentation provided here.
 @docs Triangle, map, map2
 
 # Entities
-@docs entity
+@docs trianglesEntity, entity, pointsEntity, linesEntity
 
 # WebGL Element
 @docs webgl
@@ -39,6 +39,10 @@ that describe the corners of a triangle.
 -}
 type alias Triangle attributes =
     (attributes, attributes, attributes)
+
+-- | Like Triangles, but Lines are composed of two sets of attributes.
+type alias Line attributes =
+    (attributes, attributes)
 
 
 {-| Apply a function to each vertex. This lets you transform the set of
@@ -103,9 +107,25 @@ Values will be cached intelligently, so if you have already sent a shader or
 mesh to the GPU, it will not be resent. This means it is fairly cheap to create
 new entities if you are reusing shaders and meshes that have been used before.
 -}
-entity : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> List (Triangle attributes) -> uniforms -> Entity
-entity =
-  Native.WebGL.entity
+trianglesEntity : Shader attributes uniforms varyings -> Shader {} uniforms varyings
+      -> List (Triangle attributes) -> uniforms -> Entity
+trianglesEntity =
+  Native.WebGL.trianglesEntity
+
+--| An alias for trianglesEntity
+entity = trianglesEntity
+
+--| Same as trianglesEntity, but draws points in every vertex instead of triangles.
+pointsEntity : Shader attributes uniforms varyings -> Shader {} uniforms varyings
+            -> List attributes -> uniforms -> Entity
+pointsEntity =
+  Native.WebGL.pointsEntity
+
+--| Same as trianglesEntity, but draws lines in every vertex instead of triangles.
+linesEntity : Shader attributes uniforms varyings -> Shader {} uniforms varyings
+           -> List (Line attributes) -> uniforms -> Entity
+linesEntity =
+  Native.WebGL.linesEntity
 
 
 {-| Render a WebGL scene with the given dimensions and entities. Shaders and
