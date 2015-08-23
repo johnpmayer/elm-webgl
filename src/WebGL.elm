@@ -5,6 +5,9 @@ module WebGL where
 and look at some examples before trying to do too much with just the
 documentation provided here.
 
+# Main Types
+@docs Texture, Shader, Entity, Error
+
 # Triangles
 @docs Triangle, map, map2
 
@@ -74,11 +77,11 @@ unsafeShader : String -> Shader attribute uniform varying
 unsafeShader =
   Native.WebGL.unsafeCoerceGLSL
 
-
+{-| A fixed source of pixel data which is understood by the graphics context -}
 type Texture = Texture
 
-type Error =
-    Error
+{-| An error which occured in the graphics ocntext -}
+type Error = Error
 
 {-| Loads a texture from the given url. PNG and JPEG are known to work, but
 other formats have not been as well-tested yet.
@@ -87,6 +90,7 @@ loadTexture : String -> Task Error Texture
 loadTexture url =
   Native.WebGL.loadTexture url
 
+{-| Conceptually, an encapsulataion of the instructions to render something -}
 type Entity = Entity 
 
 
