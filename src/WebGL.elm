@@ -5,6 +5,9 @@ module WebGL where
 and look at some examples before trying to do too much with just the
 documentation provided here.
 
+# Main Types
+@docs Texture, Shader, Entity, Error
+
 # Triangles
 @docs Triangle, map, map2
 
@@ -22,11 +25,9 @@ documentation provided here.
 
 -}
 
-import Graphics.Element (Element)
-import Http (Response)
+import Graphics.Element exposing (Element)
 import Native.WebGL
-import Signal (Signal)
-
+import Task exposing (Task)
 
 {-| Triangles are the basic building blocks of a mesh. You can put them together
 to form any shape. Each corner of a triangle is called a *vertex* and contains a
@@ -76,17 +77,18 @@ unsafeShader : String -> Shader attribute uniform varying
 unsafeShader =
   Native.WebGL.unsafeCoerceGLSL
 
-
+{-| A fixed source of pixel data which is understood by the graphics context -}
 type Texture = Texture
 
+{-| An error which occured in the graphics ocntext -}
+type Error = Error
 
 {-| Loads a texture from the given url. PNG and JPEG are known to work, but
 other formats have not been as well-tested yet.
 -}
-loadTexture : String -> Signal (Response Texture)
-loadTexture =
-  Native.WebGL.loadTex
-
+loadTexture : String -> Task Error Texture
+loadTexture url =
+  Native.WebGL.loadTexture url
 
 {-| Return the (width, height) size of a texture. Useful for sprite sheets
 or other times you may want to use only a potion of a texture image.
@@ -95,9 +97,8 @@ textureSize : Texture -> (Int, Int)
 textureSize =
     Native.WebGL.textureSize
 
-
-type Entity = Entity
-
+{-| Conceptually, an encapsulataion of the instructions to render something -}
+type Entity = Entity 
 
 {-| Packages a vertex shader, a fragment shader, a mesh, and uniform variables
 as an `Entity`. This specifies a full rendering pipeline to be run on the GPU.

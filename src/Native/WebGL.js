@@ -14,37 +14,29 @@ Elm.Native.WebGL.make = function(elm) {
   }
 
   var createNode = Elm.Native.Graphics.Element.make(elm).createNode;
-  var newElement = Elm.Graphics.Element.make(elm).newElement;
+  var newElement = Elm.Native.Graphics.Element.make(elm).newElement;
 
-  var List = Elm.Native.List.make(elm);
-  var Utils = Elm.Native.Utils.make(elm);
+  var List   = Elm.List.make(elm);
+  var Utils  = Elm.Native.Utils.make(elm);
   var Signal = Elm.Signal.make(elm);
   var Tuple2 = Utils.Tuple2;
+  var Task   = Elm.Native.Task.make(elm);
 
   function unsafeCoerceGLSL(src) {
     return { src : src };
   }
 
-  function loadTex(source) {
-
-    var response = Signal.constant(elm.Http.values.Waiting);
-
-    var img = new Image();
-
-    img.onload = function() {
-      var success = elm.Http.values.Success({img:img});
-      elm.notify(response.id, success);
-    }
-
-    img.onerror = function(e) {
-      var failure = A2(elm.Http.values.Failure,0,"Failed");
-      elm.notify(response.id, failure);
-    }
-
-    img.src = source;
-
-    return response;
-
+  function loadTexture(source) {
+    return Task.asyncFunction(function(callback) {
+      var img = new Image();
+      img.onload = function() {
+        return callback(Task.succeed({img:img}));
+      };
+      img.onerror = function(e) {
+        return callback(Task.fail({ ctor: 'Error' }));
+      };
+      img.src = source;
+    });
   }
 
   function textureSize(texture) {
@@ -215,7 +207,10 @@ Elm.Native.WebGL.make = function(elm) {
     }
 
     var numIndices = 3 * List.length(bufferElems);
-    var indices = List.toArray(List.range(0, numIndices - 1));
+    var indices = [];
+    for (var i = 0; i < numIndices; i += 1) {
+      indices.push(i);
+    }
     LOG("Created index buffer");
     var indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -450,8 +445,8 @@ Elm.Native.WebGL.make = function(elm) {
 
   return elm.Native.WebGL.values = {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
-    loadTex:loadTex,
     textureSize:textureSize,
+    loadTexture:loadTexture,
     entity:F4(entity),
     webgl:F2(webgl)
   };
