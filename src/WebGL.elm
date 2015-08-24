@@ -9,10 +9,10 @@ documentation provided here.
 @docs Triangle, map, map2
 
 # Entities
-@docs entity
+@docs entity, entityWithConfig
 
 # WebGL Element
-@docs webgl
+@docs webgl, webglWithConfig, defaultConfiguration
 
 # WebGL API Calls
 @docs FunctionCall
@@ -105,17 +105,42 @@ Values will be cached intelligently, so if you have already sent a shader or
 mesh to the GPU, it will not be resent. This means it is fairly cheap to create
 new entities if you are reusing shaders and meshes that have been used before.
 -}
+entityWithConfig : List FunctionCall -> Shader attributes uniforms varyings -> Shader {} uniforms varyings -> List (Triangle attributes) -> uniforms -> Entity
+entityWithConfig functionCalls vert frag buffer uniforms =
+  computeAPICalls functionCalls
+  |> Native.WebGL.entity vert frag buffer uniforms
+
+
+{-| Same as `entityWithConfig` but without using
+custom per-entity configurations.
+-}
 entity : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> List (Triangle attributes) -> uniforms -> Entity
-entity =
-  Native.WebGL.entity
+entity = entityWithConfig []
+
+
+{-| Default configuration that is used as
+the implicit configurations for `webgl`.
+-}
+defaultConfiguration : List FunctionCall
+defaultConfiguration =
+  [ Enable DepthTest
+  ]
+
+
+{-| Same as webglWithConfig but with default configurations,
+implicitly configured for you. See `defaultConfiguration` for more information.
+-}
+webgl : (Int,Int) -> List Entity -> Element
+webgl =
+  webglWithConfig defaultConfiguration
 
 
 {-| Render a WebGL scene with the given dimensions and entities. Shaders and
 meshes are cached so that they do not get resent to the GPU, so it should be
 relatively cheap to create new entities out of existing values.
 -}
-webgl : (Int,Int) -> List FunctionCall -> List Entity -> Element
-webgl dimensions functionCalls entities =
+webglWithConfig : List FunctionCall -> (Int,Int) -> List Entity -> Element
+webglWithConfig functionCalls dimensions entities =
   computeAPICalls functionCalls
   |> Native.WebGL.webgl dimensions entities
 

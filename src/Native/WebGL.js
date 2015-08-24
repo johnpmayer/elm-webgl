@@ -39,7 +39,7 @@ Elm.Native.WebGL.make = function(elm) {
     });
   }
 
-  function entity(vert, frag, buffer, uniforms) {
+  function entity(vert, frag, buffer, uniforms, functionCalls) {
 
     if (!buffer.guid) {
       buffer.guid = Utils.guid();
@@ -49,7 +49,8 @@ Elm.Native.WebGL.make = function(elm) {
       vert: vert,
       frag: frag,
       buffer: buffer,
-      uniforms: uniforms
+      uniforms: uniforms,
+      functionCalls : functionCalls
     };
 
   }
@@ -354,6 +355,10 @@ Elm.Native.WebGL.make = function(elm) {
         }
       }
 
+      A2(List.map, function(functionCall){
+        functionCall(gl);
+      }, entity.functionCalls);
+
       gl.drawElements(gl.TRIANGLES, numIndices, gl.UNSIGNED_SHORT, 0);
 
     }
@@ -502,7 +507,7 @@ Elm.Native.WebGL.make = function(elm) {
   return elm.Native.WebGL.values = {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
     loadTexture:loadTexture,
-    entity:F4(entity),
+    entity:F5(entity),
     webgl:F3(webgl),
     enable:enable,
     disable:disable,
