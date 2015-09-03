@@ -58,7 +58,7 @@ Elm.Native.WebGL.make = function(elm) {
 
   }
   
-  function entity(vert, frag, buffer, uniforms, functionCalls) {
+  function render(vert, frag, buffer, uniforms, functionCalls) {
 
     if (!buffer.guid) {
       buffer.guid = Utils.guid();
@@ -129,8 +129,8 @@ Elm.Native.WebGL.make = function(elm) {
 
 	}
 
-  function get_entity_info(gl, entity_type) {
-	switch(entity_type) {
+  function get_render_info(gl, render_type) {
+	switch(render_type) {
 		case 'Triangle': return { mode: gl.TRIANGLES, elemSize: 3 }; 
 		case 'LineStrip' : return { mode: gl.LINE_STRIP, elemSize: 1 };
 		case 'LineLoop' : return { mode: gl.LINE_LOOP, elemSize: 1 };
@@ -244,44 +244,44 @@ Elm.Native.WebGL.make = function(elm) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     LOG("Drawing");
 
-    function drawEntity(entity) {
-      if(List.length(entity.buffer._0) === 0)
+    function drawEntity(render) {
+      if(List.length(render.buffer._0) === 0)
           return;
       
       var program;
-      if (entity.vert.id && entity.frag.id) {
-        var progid = entity.vert.id + '#' + entity.frag.id;
+      if (render.vert.id && render.frag.id) {
+        var progid = render.vert.id + '#' + render.frag.id;
         program = model.cache.programs[progid];
       }
 
       if (!program) {
 
         var vshader = undefined;
-        if (entity.vert.id) {
-          vshader = model.cache.shaders[entity.vert.id];
+        if (render.vert.id) {
+          vshader = model.cache.shaders[render.vert.id];
         } else {
-          entity.vert.id = Utils.guid();
+          render.vert.id = Utils.guid();
         }
 
         if (!vshader) {
-          vshader = do_compile(gl, entity.vert.src, gl.VERTEX_SHADER);
-          model.cache.shaders[entity.vert.id] = vshader;
+          vshader = do_compile(gl, render.vert.src, gl.VERTEX_SHADER);
+          model.cache.shaders[render.vert.id] = vshader;
         }
 
         var fshader = undefined;
-        if (entity.frag.id) {
-          fshader = model.cache.shaders[entity.frag.id];
+        if (render.frag.id) {
+          fshader = model.cache.shaders[render.frag.id];
         } else {
-          entity.frag.id = Utils.guid();
+          render.frag.id = Utils.guid();
         }
 
         if (!fshader) {
-          fshader = do_compile(gl, entity.frag.src, gl.FRAGMENT_SHADER);
-          model.cache.shaders[entity.frag.id] = fshader;
+          fshader = do_compile(gl, render.frag.src, gl.FRAGMENT_SHADER);
+          model.cache.shaders[render.frag.id] = fshader;
         }
 
         program = do_link(gl, vshader, fshader);
-        var progid = entity.vert.id + '#' + entity.frag.id;
+        var progid = render.vert.id + '#' + render.frag.id;
         model.cache.programs[progid] = program;
 
       }
@@ -295,25 +295,25 @@ Elm.Native.WebGL.make = function(elm) {
         var uniformLocation = gl.getUniformLocation(program, uniform.name);
         switch (uniform.type) {
           case gl.INT:
-            gl.uniform1i(uniformLocation, entity.uniforms[uniform.name]);
+            gl.uniform1i(uniformLocation, render.uniforms[uniform.name]);
             break;
           case gl.FLOAT:
-            gl.uniform1f(uniformLocation, entity.uniforms[uniform.name]);
+            gl.uniform1f(uniformLocation, render.uniforms[uniform.name]);
             break;
           case gl.FLOAT_VEC2:
-            gl.uniform2fv(uniformLocation, entity.uniforms[uniform.name]);
+            gl.uniform2fv(uniformLocation, render.uniforms[uniform.name]);
             break;
           case gl.FLOAT_VEC3:
-            gl.uniform3fv(uniformLocation, entity.uniforms[uniform.name]);
+            gl.uniform3fv(uniformLocation, render.uniforms[uniform.name]);
             break;
           case gl.FLOAT_VEC4:
-            gl.uniform4fv(uniformLocation, entity.uniforms[uniform.name]);
+            gl.uniform4fv(uniformLocation, render.uniforms[uniform.name]);
             break;
           case gl.FLOAT_MAT4:
-            gl.uniformMatrix4fv(uniformLocation, false, entity.uniforms[uniform.name]);
+            gl.uniformMatrix4fv(uniformLocation, false, render.uniforms[uniform.name]);
             break;
           case gl.SAMPLER_2D:
-            var texture = entity.uniforms[uniform.name];
+            var texture = render.uniforms[uniform.name];
             var tex = undefined;
             if (texture.id) {
               tex = model.cache.textures[texture.id];
@@ -335,12 +335,12 @@ Elm.Native.WebGL.make = function(elm) {
             break;
         }
       }
-	  var entityType = get_entity_info(gl, entity.buffer.ctor); 
-      var buffer = model.cache.buffers[entity.buffer.guid];
+	  var renderType = get_render_info(gl, render.buffer.ctor); 
+      var buffer = model.cache.buffers[render.buffer.guid];
       
       if (!buffer) {
-        buffer = do_bind_setup(gl, entity.buffer._0, entityType.elemSize);
-        model.cache.buffers[entity.buffer.guid] = buffer;
+        buffer = do_bind_setup(gl, render.buffer._0, renderType.elemSize);
+        model.cache.buffers[render.buffer.guid] = buffer;
       }
 
       var numIndices = buffer.numIndices;
@@ -356,19 +356,19 @@ Elm.Native.WebGL.make = function(elm) {
         gl.enableVertexAttribArray(attribLocation);
                 
         if(buffer.buffers[attribute.name] === undefined) {                 
-            buffer.buffers[attribute.name] = do_bind_attribute (gl, attribute, entity.buffer._0, entityType.elemSize);
+            buffer.buffers[attribute.name] = do_bind_attribute (gl, attribute, render.buffer._0, renderType.elemSize);
         }
         var attributeBuffer = buffer.buffers[attribute.name];         
         var attributeInfo = get_attribute_info(gl, attribute.type); 
 
         A2(List.map, function(functionCall){
           functionCall(gl);
-        }, entity.functionCalls);
+        }, render.functionCalls);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
         gl.vertexAttribPointer(attribLocation, attributeInfo.size, attributeInfo.baseType, false, 0, 0);
       }
-      gl.drawElements(entityType.mode, numIndices, gl.UNSIGNED_SHORT, 0);
+      gl.drawElements(renderType.mode, numIndices, gl.UNSIGNED_SHORT, 0);
 
     }
 
@@ -517,7 +517,7 @@ Elm.Native.WebGL.make = function(elm) {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
     textureSize:textureSize,
     loadTexture:loadTexture,
-    entity:F5(entity),
+    render:F5(render),
     webgl:F3(webgl),
     enable:enable,
     disable:disable,
