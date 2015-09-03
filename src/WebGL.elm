@@ -6,10 +6,7 @@ and look at some examples before trying to do too much with just the
 documentation provided here.
 
 # Main Types
-@docs Texture, TextureFilter, Shader, Entity, Error
-
-# Triangles
-@docs Triangle, map, map2
+@docs Texture, TextureFilter, Shader, Renderable, Error, Drawable
 
 # Entities
 @docs entity
@@ -44,7 +41,7 @@ that describe the corners of a triangle.
 See: [Library reference](https://msdn.microsoft.com/en-us/library/dn302395(v=vs.85).aspx) for the description of each type. 
 -}
 
-type RenderableType attributes
+type Drawable attributes
   = Triangle (List (attributes, attributes, attributes))
   | Lines (List (attributes, attributes) )
   | LineStrip (List attributes)
@@ -105,10 +102,10 @@ textureSize =
     Native.WebGL.textureSize
 
 {-| Conceptually, an encapsulataion of the instructions to render something -}
-type Entity = Entity 
+type Renderable = Renderable 
 
 {-| Packages a vertex shader, a fragment shader, a mesh, and uniform variables
-as an `Entity`. This specifies a full rendering pipeline to be run on the GPU.
+as an `Renderable`. This specifies a full rendering pipeline to be run on the GPU.
 You can read more about the pipeline
 [here](https://github.com/johnpmayer/elm-webgl/blob/master/README.md).
 
@@ -116,7 +113,7 @@ Values will be cached intelligently, so if you have already sent a shader or
 mesh to the GPU, it will not be resent. This means it is fairly cheap to create
 new entities if you are reusing shaders and meshes that have been used before.
 -}
-entity : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> (RenderableType attributes) -> uniforms -> Entity
+entity : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> (Drawable attributes) -> uniforms -> Renderable
 entity =
   Native.WebGL.entity
 
@@ -125,6 +122,6 @@ entity =
 meshes are cached so that they do not get resent to the GPU, so it should be
 relatively cheap to create new entities out of existing values.
 -}
-webgl : (Int,Int) -> List Entity -> Element
+webgl : (Int,Int) -> List Renderable -> Element
 webgl =
   Native.WebGL.webgl
