@@ -18,7 +18,7 @@ documentation provided here.
 @docs webgl
 
 # Loading Textures
-@docs loadTexture
+@docs loadTexture, textureSize
 
 # Unsafe Shader Creation (for library writers)
 @docs unsafeShader
@@ -90,9 +90,15 @@ loadTexture : String -> Task Error Texture
 loadTexture url =
   Native.WebGL.loadTexture url
 
+{-| Return the (width, height) size of a texture. Useful for sprite sheets
+or other times you may want to use only a potion of a texture image.
+-}
+textureSize : Texture -> (Int, Int)
+textureSize =
+    Native.WebGL.textureSize
+
 {-| Conceptually, an encapsulataion of the instructions to render something -}
 type Entity = Entity 
-
 
 {-| Packages a vertex shader, a fragment shader, a mesh, and uniform variables
 as an `Entity`. This specifies a full rendering pipeline to be run on the GPU.

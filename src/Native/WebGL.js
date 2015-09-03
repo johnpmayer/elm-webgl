@@ -39,6 +39,12 @@ Elm.Native.WebGL.make = function(elm) {
     });
   }
 
+  function textureSize(texture) {
+
+    return Tuple2(texture.img.width, texture.img.height);
+
+  }
+
   function entity(vert, frag, buffer, uniforms) {
 
     if (!buffer.guid) {
@@ -439,6 +445,7 @@ Elm.Native.WebGL.make = function(elm) {
 
   return elm.Native.WebGL.values = {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
+    textureSize:textureSize,
     loadTexture:loadTexture,
     entity:F4(entity),
     webgl:F2(webgl)
