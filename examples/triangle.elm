@@ -10,8 +10,8 @@ import WebGL exposing (..)
 type alias Vertex = { position : Vec3, color : Vec3 }
 
 
-mesh : List (Triangle Vertex)
-mesh =
+mesh : Drawable Vertex
+mesh = Triangle
   [ ( Vertex (vec3 0  0 0) (vec3 1 0 0)
     , Vertex (vec3 1  1 0) (vec3 0 1 0)
     , Vertex (vec3 1 -1 0) (vec3 0 0 1)
@@ -29,7 +29,7 @@ main =
 view : Float -> Element
 view t =
   webgl (400,400)
-    [ entity vertexShader fragmentShader mesh { perspective = perspective (t / 1000) } ]
+    [ render vertexShader fragmentShader mesh { perspective = perspective (t / 1000) } ]
 
 
 perspective : Float -> Mat4
