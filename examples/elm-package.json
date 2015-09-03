@@ -1,0 +1,18 @@
+{
+    "version": "1.0.0",
+    "summary": "Examples",
+    "repository": "https://github.com/USER/PROJECT.git",
+    "license": "BSD3",
+    "source-directories": [
+        "."
+    ],
+    "exposed-modules": [],
+    "dependencies": {
+        "elm-lang/core": "2.1.0 <= v < 3.0.0",
+        "evancz/elm-http": "1.0.0 <= v < 2.0.0"
+    },
+    "extra-dependencies": {
+        "elm-webgl": ".."
+    },
+    "elm-version": "0.15.1 <= v < 0.16.0"
+}

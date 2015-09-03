@@ -5,8 +5,8 @@ module WebGL where
 and look at some examples before trying to do too much with just the
 documentation provided here.
 
-# Triangles
-@docs Triangle, map, map2
+# Main Types
+@docs Texture, TextureFilter, Shader, Renderable, Error, Drawable
 
 # Entities
 @docs entity, entityWithConfig
@@ -21,7 +21,7 @@ documentation provided here.
 @docs Capability, BlendOperation, BlendMode, CompareMode, FaceMode, ZMode
 
 # Loading Textures
-@docs loadTexture
+@docs loadTexture, loadTextureWithFilter, textureSize
 
 # Unsafe Shader Creation (for library writers)
 @docs unsafeShader
@@ -32,33 +32,29 @@ import Graphics.Element exposing (Element)
 import Native.WebGL
 import Task exposing (Task)
 
-{-| Triangles are the basic building blocks of a mesh. You can put them together
+{-| 
+WebGl has a number of rendering modes available. Each of the tagged union types 
+maps to a separate rendering mode. 
+
+Triangles are the basic building blocks of a mesh. You can put them together
 to form any shape. Each corner of a triangle is called a *vertex* and contains a
 bunch of *attributes* that describe that particular corner. These attributes can
 be things like position and color.
 
 So when you create a `Triangle` you are really providing three sets of attributes
 that describe the corners of a triangle.
+
+See: [Library reference](https://msdn.microsoft.com/en-us/library/dn302395(v=vs.85).aspx) for the description of each type. 
 -}
-type alias Triangle attributes =
-    (attributes, attributes, attributes)
 
-
-{-| Apply a function to each vertex. This lets you transform the set of
-attributes associated with each corner of a triangle.
--}
-map : (a -> b) -> Triangle a -> Triangle b
-map f (x,y,z) =
-    (f x, f y, f z)
-
-
-{-| Combine two triangles by putting each of their vertices together with
-a given function.
--}
-map2 : (a -> b -> c) -> Triangle a -> Triangle b -> Triangle c
-map2 f (x,y,z) (x',y',z') =
-    (f x x', f y y', f z z')
-
+type Drawable attributes
+  = Triangle (List (attributes, attributes, attributes))
+  | Lines (List (attributes, attributes) )
+  | LineStrip (List attributes)
+  | LineLoop (List attributes)
+  | Points (List attributes)
+  | TriangleFan (List attributes)
+  | TriangleStrip (List attributes)
 
 {-| Shader is a phantom data type. Don't instantiate it yourself. See below.
 -}
@@ -80,24 +76,42 @@ unsafeShader : String -> Shader attribute uniform varying
 unsafeShader =
   Native.WebGL.unsafeCoerceGLSL
 
-
+{-| A `Texture` loads a texture with linear filtering enabled. If you do not
+want filtering, create a `RawTexture` with `loadTextureRaw`.
+-}
 type Texture = Texture
 
-type Error =
-    Error
+{-| Textures work in two ways when looking up a pixel value - Linear or Nearest 
+-}
+type TextureFilter = Linear | Nearest
+
+{-| An error which occured in the graphics ocntext -}
+type Error = Error
 
 {-| Loads a texture from the given url. PNG and JPEG are known to work, but
 other formats have not been as well-tested yet.
 -}
 loadTexture : String -> Task Error Texture
-loadTexture url =
-  Native.WebGL.loadTexture url
+loadTexture = loadTextureWithFilter Linear 
 
-type Entity = Entity
+{-| Loads a texture from the given url. PNG and JPEG are known to work, but
+other formats have not been as well-tested yet. Configurable filter.
+-}
+loadTextureWithFilter : TextureFilter -> String -> Task Error Texture
+loadTextureWithFilter filter url = Native.WebGL.loadTextureRaw Linear url
 
+{-| Return the (width, height) size of a texture. Useful for sprite sheets
+or other times you may want to use only a potion of a texture image.
+-}
+textureSize : Texture -> (Int, Int)
+textureSize =
+    Native.WebGL.textureSize
+
+{-| Conceptually, an encapsulataion of the instructions to render something -}
+type Renderable = Renderable 
 
 {-| Packages a vertex shader, a fragment shader, a mesh, and uniform variables
-as an `Entity`. This specifies a full rendering pipeline to be run on the GPU.
+as an `Renderable`. This specifies a full rendering pipeline to be run on the GPU.
 You can read more about the pipeline
 [here](https://github.com/johnpmayer/elm-webgl/blob/master/README.md).
 
@@ -105,8 +119,8 @@ Values will be cached intelligently, so if you have already sent a shader or
 mesh to the GPU, it will not be resent. This means it is fairly cheap to create
 new entities if you are reusing shaders and meshes that have been used before.
 -}
-entityWithConfig : List FunctionCall -> Shader attributes uniforms varyings -> Shader {} uniforms varyings -> List (Triangle attributes) -> uniforms -> Entity
-entityWithConfig functionCalls vert frag buffer uniforms =
+renderWithConfig : List FunctionCall -> Shader attributes uniforms varyings -> Shader {} uniforms varyings -> (Drawable attributes) -> uniforms -> Renderable
+renderWithConfig functionCalls vert frag buffer uniforms =
   computeAPICalls functionCalls
   |> Native.WebGL.entity vert frag buffer uniforms
 
@@ -114,8 +128,8 @@ entityWithConfig functionCalls vert frag buffer uniforms =
 {-| Same as `entityWithConfig` but without using
 custom per-entity configurations.
 -}
-entity : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> List (Triangle attributes) -> uniforms -> Entity
-entity = entityWithConfig []
+render : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> (Drawable attributes) -> uniforms -> Renderable
+render = entityWithConfig []
 
 
 {-| Default configuration that is used as
@@ -130,7 +144,7 @@ defaultConfiguration =
 {-| Same as webglWithConfig but with default configurations,
 implicitly configured for you. See `defaultConfiguration` for more information.
 -}
-webgl : (Int,Int) -> List Entity -> Element
+webgl : (Int,Int) -> List Renderable -> Element
 webgl =
   webglWithConfig defaultConfiguration
 
@@ -139,7 +153,7 @@ webgl =
 meshes are cached so that they do not get resent to the GPU, so it should be
 relatively cheap to create new entities out of existing values.
 -}
-webglWithConfig : List FunctionCall -> (Int,Int) -> List Entity -> Element
+webglWithConfig : List FunctionCall -> (Int,Int) -> List Renderable -> Element
 webglWithConfig functionCalls dimensions entities =
   computeAPICalls functionCalls
   |> Native.WebGL.webgl dimensions entities
