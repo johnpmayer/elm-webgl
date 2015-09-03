@@ -57,8 +57,8 @@ Elm.Native.WebGL.make = function(elm) {
     return Tuple2(texture.img.width, texture.img.height);
 
   }
-
-  function entity(vert, frag, buffer, uniforms) {
+  
+  function entity(vert, frag, buffer, uniforms, functionCalls) {
 
     if (!buffer.guid) {
       buffer.guid = Utils.guid();
@@ -68,7 +68,8 @@ Elm.Native.WebGL.make = function(elm) {
       vert: vert,
       frag: frag,
       buffer: buffer,
-      uniforms: uniforms
+      uniforms: uniforms,
+      functionCalls : functionCalls
     };
 
   }
@@ -126,116 +127,104 @@ Elm.Native.WebGL.make = function(elm) {
 
     return program;
 
-  }
+	}
 
-  function do_bind (gl, program, bufferElems) {
+  function get_entity_info(gl, entity_type) {
+	switch(entity_type) {
+		case 'Triangle': return { mode: gl.TRIANGLES, elemSize: 3 }; 
+		case 'LineStrip' : return { mode: gl.LINE_STRIP, elemSize: 1 };
+		case 'LineLoop' : return { mode: gl.LINE_LOOP, elemSize: 1 };
+		case 'Points' : return { mode: gl.POINTS, elemSize: 1 };
+		case 'Lines': return { mode: gl.LINES, elemSize: 2 }; 
+		case 'TriangleStrip': return { mode: gl.TRIANGLE_STRIP, elemSize: 1 }; 
+		case 'TriangleFan': return { mode: gl.TRIANGLE_FAN, elemSize: 1 }; 
+	}
+  }; 
 
-    var buffers = {};
+  function get_attribute_info(gl, type) {
+		switch(type) {
+			case gl.FLOAT:      return { size: 1, type: Float32Array, baseType: gl.FLOAT };
+			case gl.FLOAT_VEC2: return { size: 2, type: Float32Array, baseType: gl.FLOAT };
+			case gl.FLOAT_VEC3: return { size: 3, type: Float32Array, baseType: gl.FLOAT };
+			case gl.FLOAT_VEC4: return { size: 4, type: Float32Array, baseType: gl.FLOAT };			
+			case gl.INT: 		return { size: 1, type: Int32Array, baseType: gl.INT };
+			case gl.INT_VEC2: 	return { size: 2, type: Int32Array, baseType: gl.INT };
+			case gl.INT_VEC3: 	return { size: 3, type: Int32Array, baseType: gl.INT };
+			case gl.INT_VEC4: 	return { size: 4, type: Int32Array, baseType: gl.INT };			
+		}
+	  };
+      
+  /**
+        Form the buffer for a given attribute. 
+        
+        @param gl gl context
+        @param attribute the attribute to bind to. We use its name to grab the record by name and also to know
+                how many elements we need to grab.
+        @param bufferElems The list coming in from elm. 
+        @param elem_length The length of the number of vertices that complete one 'thing' based on the drawing mode. 
+            ie, 2 for Lines, 3 for Triangles, etc. 
+  */
+  function do_bind_attribute (gl, attribute, bufferElems, elem_length) {      
+    var idxKeys = []; 
+    for(var i = 0;i < elem_length;i++) idxKeys.push('_'+i); 
 
-    var attributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-    for (var i = 0; i < attributes; i += 1) {
-      var attribute = gl.getActiveAttrib(program, i);
-      switch (attribute.type) {
-        case gl.FLOAT_VEC2:
+    function dataFill(data, cnt, fillOffset, elem, key) {						
+        if(elem_length == 1)
+            for(var i = 0;i < cnt;i++)
+                data[fillOffset++] = cnt === 1 ? elem[key] : elem[key][i];			
+        else
+            idxKeys.forEach( function(idx) {
+                for(var i = 0;i < cnt;i++) 
+                    data[fillOffset++] = (cnt === 1 ? elem[idx][key] : elem[idx][key][i]);						
+            }); 		
+    };
 
-          // Might want to invert the loop
-          // to build the array buffer first
-          // and then bind each one-at-a-time
-          var data = [];
-          A2(List.map, function(elem){
-            data.push(elem._0[attribute.name][0]);
-            data.push(elem._0[attribute.name][1]);
-            data.push(elem._1[attribute.name][0]);
-            data.push(elem._1[attribute.name][1]);
-            data.push(elem._2[attribute.name][0]);
-            data.push(elem._2[attribute.name][1]);
-          }, bufferElems);
-          var array = new Float32Array(data);
+    var attributeInfo = get_attribute_info(gl, attribute.type); 
 
-          var buffer = gl.createBuffer();
-          LOG("Created attribute buffer " + attribute.name);
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
-
-          buffers[attribute.name] = buffer;
-
-          break;
-
-        case gl.FLOAT_VEC3:
-
-          // Might want to invert the loop
-          // to build the array buffer first
-          // and then bind each one-at-a-time
-          var data = [];
-          A2(List.map, function(elem){
-            data.push(elem._0[attribute.name][0]);
-            data.push(elem._0[attribute.name][1]);
-            data.push(elem._0[attribute.name][2]);
-            data.push(elem._1[attribute.name][0]);
-            data.push(elem._1[attribute.name][1]);
-            data.push(elem._1[attribute.name][2]);
-            data.push(elem._2[attribute.name][0]);
-            data.push(elem._2[attribute.name][1]);
-            data.push(elem._2[attribute.name][2]);
-          }, bufferElems);
-          var array = new Float32Array(data);
-
-          var buffer = gl.createBuffer();
-          LOG("Created attribute buffer " + attribute.name);
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
-
-          buffers[attribute.name] = buffer;
-
-          break;
-
-        case gl.FLOAT_VEC4:
-
-          // Might want to invert the loop
-          // to build the array buffer first
-          // and then bind each one-at-a-time
-          var data = [];
-          A2(List.map, function(elem){
-            data.push(elem._0[attribute.name][0]);
-            data.push(elem._0[attribute.name][1]);
-            data.push(elem._0[attribute.name][2]);
-            data.push(elem._0[attribute.name][3]);
-            data.push(elem._1[attribute.name][0]);
-            data.push(elem._1[attribute.name][1]);
-            data.push(elem._1[attribute.name][2]);
-            data.push(elem._1[attribute.name][3]);
-            data.push(elem._2[attribute.name][0]);
-            data.push(elem._2[attribute.name][1]);
-            data.push(elem._2[attribute.name][2]);
-            data.push(elem._2[attribute.name][3]);
-          }, bufferElems);
-          var array = new Float32Array(data);
-
-          var buffer = gl.createBuffer();
-          LOG("Created attribute buffer " + attribute.name);
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-          gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
-
-          buffers[attribute.name] = buffer;
-
-          break;
-
-        default:
-          LOG("Bad buffer type");
-          break;
-      }
-
+    if(attributeInfo === undefined) {
+        throw error("No info available for: " + attribute.type); 
     }
 
-    var numIndices = 3 * List.length(bufferElems);
-    var indices = [];
+    var data_idx = 0; 
+    var array = new attributeInfo.type( List.length(bufferElems) * attributeInfo.size * elem_length);
+      
+    A2(List.map, function(elem) {
+        dataFill(array, attributeInfo.size, data_idx, elem, attribute.name); 
+        data_idx += attributeInfo.size * elem_length;
+    }, bufferElems);
+
+    var buffer = gl.createBuffer();
+    LOG("Created attribute buffer " + attribute.name);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+    return buffer; 
+  };
+  
+  /**
+    This sets up the binding cacheing buffers. 
+    
+    We don't actually bind any buffers now except for the indices buffer, which we fill with 0..n. The problem
+    with filling the buffers here is that it is possible to have a buffer shared between two webgl shaders; which
+    could have different active attributes. If we bind it here against a particular program, we might not bind 
+    them all. That final bind is now done right before drawing. 
+    
+    @param gl gl context
+    @param bufferElems The list coming in from elm. 
+    @param elem_length The length of the number of vertices that complete one 'thing' based on the drawing mode. 
+            ie, 2 for Lines, 3 for Triangles, etc. 
+  */
+  function do_bind_setup (gl, bufferElems, elem_length) {
+	var buffers = {};
+    
+    var numIndices = elem_length * List.length(bufferElems);
+    var indices = new Uint16Array(numIndices);
     for (var i = 0; i < numIndices; i += 1) {
-      indices.push(i);
+      indices[i] = i; 
     }
     LOG("Created index buffer");
     var indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
     var bufferObject = {
       numIndices: numIndices,
@@ -256,7 +245,9 @@ Elm.Native.WebGL.make = function(elm) {
     LOG("Drawing");
 
     function drawEntity(entity) {
-
+      if(List.length(entity.buffer._0) === 0)
+          return;
+      
       var program;
       if (entity.vert.id && entity.frag.id) {
         var progid = entity.vert.id + '#' + entity.frag.id;
@@ -311,7 +302,7 @@ Elm.Native.WebGL.make = function(elm) {
             break;
           case gl.FLOAT_VEC2:
             gl.uniform2fv(uniformLocation, entity.uniforms[uniform.name]);
-            break;            
+            break;
           case gl.FLOAT_VEC3:
             gl.uniform3fv(uniformLocation, entity.uniforms[uniform.name]);
             break;
@@ -344,10 +335,11 @@ Elm.Native.WebGL.make = function(elm) {
             break;
         }
       }
-
+	  var entityType = get_entity_info(gl, entity.buffer.ctor); 
       var buffer = model.cache.buffers[entity.buffer.guid];
+      
       if (!buffer) {
-        buffer = do_bind(gl, program, entity.buffer);
+        buffer = do_bind_setup(gl, entity.buffer._0, entityType.elemSize);
         model.cache.buffers[entity.buffer.guid] = buffer;
       }
 
@@ -356,32 +348,27 @@ Elm.Native.WebGL.make = function(elm) {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 
       var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+        
       for (var i = 0; i < numAttributes; i += 1) {
         var attribute = gl.getActiveAttrib(program, i);
+        
         var attribLocation = gl.getAttribLocation(program, attribute.name);
         gl.enableVertexAttribArray(attribLocation);
-        var attributeBuffer = buffer.buffers[attribute.name];
-
-        switch (attribute.type) {
-          case gl.FLOAT_VEC2:
-            gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
-            gl.vertexAttribPointer(attribLocation, 2, gl.FLOAT, false, 0, 0);
-            break;
-          case gl.FLOAT_VEC3:
-            gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
-            gl.vertexAttribPointer(attribLocation, 3, gl.FLOAT, false, 0, 0);
-            break;
-          case gl.FLOAT_VEC4:
-            gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
-            gl.vertexAttribPointer(attribLocation, 4, gl.FLOAT, false, 0, 0);
-            break;
-          default:
-            LOG("Unsupported attribute type: " + attribute.type);
-            break;
+                
+        if(buffer.buffers[attribute.name] === undefined) {                 
+            buffer.buffers[attribute.name] = do_bind_attribute (gl, attribute, entity.buffer._0, entityType.elemSize);
         }
-      }
+        var attributeBuffer = buffer.buffers[attribute.name];         
+        var attributeInfo = get_attribute_info(gl, attribute.type); 
 
-      gl.drawElements(gl.TRIANGLES, numIndices, gl.UNSIGNED_SHORT, 0);
+        A2(List.map, function(functionCall){
+          functionCall(gl);
+        }, entity.functionCalls);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
+        gl.vertexAttribPointer(attribLocation, attributeInfo.size, attributeInfo.baseType, false, 0, 0);
+      }
+      gl.drawElements(entityType.mode, numIndices, gl.UNSIGNED_SHORT, 0);
 
     }
 
@@ -389,7 +376,67 @@ Elm.Native.WebGL.make = function(elm) {
 
   }
 
-  function webgl(dimensions, models) {
+  function enable(capability) {
+    return function(gl) { gl.enable(gl[capability]); };
+  }
+
+  function disable(capability) {
+    return function(gl) { gl.disable(gl[capability]); };
+  }
+
+  function blendColor(r, g, b, a) {
+    return function(gl) { gl.blendColor(r, g, b, a); };
+  }
+
+  function blendEquation(mode) {
+    return function(gl) { gl.blendEquation(gl[mode]); };
+  }
+
+  function blendEquationSeparate(modeRGB, modeAlpha) {
+    return function(gl) {
+      gl.blendEquationSeparate(gl[modeRGB], gl[modeAlpha]);
+    };
+  }
+
+  function blendFunc(src, dst) {
+    return function(gl) { gl.blendFunc(gl[src], gl[dst]); };
+  }
+
+  function depthFunc(mode) {
+    return function(gl) { gl.depthFunc(gl[mode]); };
+  }
+
+  function sampleCoverage(value, invert) {
+    return function(gl) {
+      gl.sampleCoverage(value, invert);
+    };
+  }
+
+  function stencilFunc(func, ref, mask) {
+    return function(gl) {
+      gl.stencilFunc(gl[func], ref, mask);
+    };
+  }
+
+  function stencilFuncSeparate(face, func, ref, mask) {
+    return function(gl) {
+      gl.stencilFuncSeparate(gl[face], gl[func], ref, mask);
+    };
+  }
+
+  function stencilOperation(fail, zfail, zpass) {
+    return function(gl) {
+      gl.stencilOperation(gl[fail], gl[zfail], gl[zpass]);
+    }
+  }
+
+  function stencilOperationSeparate(face, fail, zfail, zpass) {
+    return function(gl) {
+      gl.stencilOperationSeparate(gl[face], gl[fail], gl[zfail], gl[zpass]);
+    }
+  }
+
+  function webgl(dimensions, models, functionCalls) {
 
     var w = dimensions._0;
     var h = dimensions._1;
@@ -402,7 +449,9 @@ Elm.Native.WebGL.make = function(elm) {
       var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
       if (gl) {
-        gl.enable(gl.DEPTH_TEST);
+        A2(List.map, function(functionCall){
+          functionCall(gl);
+        }, functionCalls);
       } else {
         div.innerHTML =
           '<div style="display: table-cell; text-align: center; width: ' + w + 'px; height: ' + h +
@@ -468,9 +517,21 @@ Elm.Native.WebGL.make = function(elm) {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
     textureSize:textureSize,
     loadTexture:loadTexture,
+    entity:F5(entity),
+    webgl:F3(webgl),
+    enable:enable,
+    disable:disable,
+    blendColor:F4(blendColor),
+    blendEquation:blendEquation,
+    blendEquationSeparate:F2(blendEquationSeparate),
+    blendFunc:F2(blendFunc),
+    depthFunc:depthFunc,
+    sampleCoverage:F2(sampleCoverage),
+    stencilFunc:F3(stencilFunc),
+    stencilFuncSeparate:F4(stencilFuncSeparate),
+    stencilOperation:F3(stencilOperation),
+    stencilOperationSeparate:F4(stencilOperationSeparate),
     loadTextureRaw:loadTextureRaw,
-    entity:F4(entity),
-    webgl:F2(webgl)
   };
 
 };
