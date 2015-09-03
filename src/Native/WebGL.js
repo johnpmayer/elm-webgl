@@ -57,8 +57,8 @@ Elm.Native.WebGL.make = function(elm) {
     return Tuple2(texture.img.width, texture.img.height);
 
   }
-
-  function entity(vert, frag, buffer, uniforms) {
+  
+  function entity(vert, frag, buffer, uniforms, functionCalls) {
 
     if (!buffer.guid) {
       buffer.guid = Utils.guid();
@@ -68,7 +68,8 @@ Elm.Native.WebGL.make = function(elm) {
       vert: vert,
       frag: frag,
       buffer: buffer,
-      uniforms: uniforms
+      uniforms: uniforms,
+      functionCalls : functionCalls
     };
 
   }
@@ -301,7 +302,7 @@ Elm.Native.WebGL.make = function(elm) {
             break;
           case gl.FLOAT_VEC2:
             gl.uniform2fv(uniformLocation, entity.uniforms[uniform.name]);
-            break;            
+            break;
           case gl.FLOAT_VEC3:
             gl.uniform3fv(uniformLocation, entity.uniforms[uniform.name]);
             break;
@@ -358,10 +359,14 @@ Elm.Native.WebGL.make = function(elm) {
             buffer.buffers[attribute.name] = do_bind_attribute (gl, attribute, entity.buffer._0, entityType.elemSize);
         }
         var attributeBuffer = buffer.buffers[attribute.name];         
-		var attributeInfo = get_attribute_info(gl, attribute.type); 
+        var attributeInfo = get_attribute_info(gl, attribute.type); 
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
-		gl.vertexAttribPointer(attribLocation, attributeInfo.size, attributeInfo.baseType, false, 0, 0);
+        A2(List.map, function(functionCall){
+          functionCall(gl);
+        }, entity.functionCalls);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
+        gl.vertexAttribPointer(attribLocation, attributeInfo.size, attributeInfo.baseType, false, 0, 0);
       }
       gl.drawElements(entityType.mode, numIndices, gl.UNSIGNED_SHORT, 0);
 
@@ -371,7 +376,67 @@ Elm.Native.WebGL.make = function(elm) {
 
   }
 
-  function webgl(dimensions, models) {
+  function enable(capability) {
+    return function(gl) { gl.enable(gl[capability]); };
+  }
+
+  function disable(capability) {
+    return function(gl) { gl.disable(gl[capability]); };
+  }
+
+  function blendColor(r, g, b, a) {
+    return function(gl) { gl.blendColor(r, g, b, a); };
+  }
+
+  function blendEquation(mode) {
+    return function(gl) { gl.blendEquation(gl[mode]); };
+  }
+
+  function blendEquationSeparate(modeRGB, modeAlpha) {
+    return function(gl) {
+      gl.blendEquationSeparate(gl[modeRGB], gl[modeAlpha]);
+    };
+  }
+
+  function blendFunc(src, dst) {
+    return function(gl) { gl.blendFunc(gl[src], gl[dst]); };
+  }
+
+  function depthFunc(mode) {
+    return function(gl) { gl.depthFunc(gl[mode]); };
+  }
+
+  function sampleCoverage(value, invert) {
+    return function(gl) {
+      gl.sampleCoverage(value, invert);
+    };
+  }
+
+  function stencilFunc(func, ref, mask) {
+    return function(gl) {
+      gl.stencilFunc(gl[func], ref, mask);
+    };
+  }
+
+  function stencilFuncSeparate(face, func, ref, mask) {
+    return function(gl) {
+      gl.stencilFuncSeparate(gl[face], gl[func], ref, mask);
+    };
+  }
+
+  function stencilOperation(fail, zfail, zpass) {
+    return function(gl) {
+      gl.stencilOperation(gl[fail], gl[zfail], gl[zpass]);
+    }
+  }
+
+  function stencilOperationSeparate(face, fail, zfail, zpass) {
+    return function(gl) {
+      gl.stencilOperationSeparate(gl[face], gl[fail], gl[zfail], gl[zpass]);
+    }
+  }
+
+  function webgl(dimensions, models, functionCalls) {
 
     var w = dimensions._0;
     var h = dimensions._1;
@@ -384,7 +449,9 @@ Elm.Native.WebGL.make = function(elm) {
       var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
       if (gl) {
-        gl.enable(gl.DEPTH_TEST);
+        A2(List.map, function(functionCall){
+          functionCall(gl);
+        }, functionCalls);
       } else {
         div.innerHTML =
           '<div style="display: table-cell; text-align: center; width: ' + w + 'px; height: ' + h +
@@ -450,9 +517,21 @@ Elm.Native.WebGL.make = function(elm) {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
     textureSize:textureSize,
     loadTexture:loadTexture,
+    entity:F5(entity),
+    webgl:F3(webgl),
+    enable:enable,
+    disable:disable,
+    blendColor:F4(blendColor),
+    blendEquation:blendEquation,
+    blendEquationSeparate:F2(blendEquationSeparate),
+    blendFunc:F2(blendFunc),
+    depthFunc:depthFunc,
+    sampleCoverage:F2(sampleCoverage),
+    stencilFunc:F3(stencilFunc),
+    stencilFuncSeparate:F4(stencilFuncSeparate),
+    stencilOperation:F3(stencilOperation),
+    stencilOperationSeparate:F4(stencilOperationSeparate),
     loadTextureRaw:loadTextureRaw,
-    entity:F4(entity),
-    webgl:F2(webgl)
   };
 
 };
