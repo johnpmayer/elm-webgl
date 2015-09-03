@@ -9,7 +9,7 @@ documentation provided here.
 @docs Texture, TextureFilter, Shader, Renderable, Error, Drawable
 
 # Entities
-@docs entity, entityWithConfig
+@docs render, renderWithConfig
 
 # WebGL Element
 @docs webgl, webglWithConfig, defaultConfiguration
@@ -25,6 +25,9 @@ documentation provided here.
 
 # Unsafe Shader Creation (for library writers)
 @docs unsafeShader
+
+# Functions
+@docs computeAPICall, computeAPICalls, computeBlendModeString, computeBlendOperationString, computeCapabilityString, computeCompareModeString, computeFaceModeString, computeZModeString
 
 -}
 
@@ -122,14 +125,14 @@ new entities if you are reusing shaders and meshes that have been used before.
 renderWithConfig : List FunctionCall -> Shader attributes uniforms varyings -> Shader {} uniforms varyings -> (Drawable attributes) -> uniforms -> Renderable
 renderWithConfig functionCalls vert frag buffer uniforms =
   computeAPICalls functionCalls
-  |> Native.WebGL.entity vert frag buffer uniforms
+  |> Native.WebGL.render vert frag buffer uniforms
 
 
-{-| Same as `entityWithConfig` but without using
-custom per-entity configurations.
+{-| Same as `renderWithConfig` but without using
+custom per-render configurations.
 -}
 render : Shader attributes uniforms varyings -> Shader {} uniforms varyings -> (Drawable attributes) -> uniforms -> Renderable
-render = entityWithConfig []
+render = renderWithConfig []
 
 
 {-| Default configuration that is used as
@@ -159,6 +162,7 @@ webglWithConfig functionCalls dimensions entities =
   |> Native.WebGL.webgl dimensions entities
 
 
+{-| -}
 computeAPICalls : List FunctionCall -> List (a -> b)
 computeAPICalls functionCalls =
   List.map
@@ -166,6 +170,7 @@ computeAPICalls functionCalls =
     functionCalls
 
 
+{-| -}
 computeAPICall : FunctionCall -> (a -> b)
 computeAPICall function =
   case function of
@@ -310,6 +315,7 @@ type FunctionCall
   | StencilOperationSeparate (FaceMode, ZMode, ZMode, ZMode)
 
 
+{-| -}
 computeCapabilityString : Capability -> String
 computeCapabilityString capability =
   case capability of
@@ -371,6 +377,7 @@ type Capability
   | StencilTest
 
 
+{-| -}
 computeBlendOperationString : BlendOperation -> String
 computeBlendOperationString operation =
   case operation of
@@ -440,6 +447,7 @@ type BlendOperation
   | SrcAlphaSaturate
 
 
+{-| -}
 computeBlendModeString : BlendMode -> String
 computeBlendModeString mode =
   case mode of
@@ -461,6 +469,7 @@ type BlendMode
   | ReverseSubtract
 
 
+{-| -}
 computeCompareModeString : CompareMode -> String
 computeCompareModeString mode =
   case mode of
@@ -502,6 +511,7 @@ type CompareMode
   | NotEqual
 
 
+{-| -}
 computeFaceModeString : FaceMode -> String
 computeFaceModeString mode =
   case mode of
@@ -523,6 +533,7 @@ type FaceMode
   | FrontAndBack
 
 
+{-| -}
 computeZModeString : ZMode -> String
 computeZModeString mode =
   case mode of
