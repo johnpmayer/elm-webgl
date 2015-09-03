@@ -30,13 +30,32 @@ Elm.Native.WebGL.make = function(elm) {
     return Task.asyncFunction(function(callback) {
       var img = new Image();
       img.onload = function() {
-        return callback(Task.succeed({img:img}));
+        return callback(Task.succeed({ctor:'Texture', img:img}));
       };
       img.onerror = function(e) {
         return callback(Task.fail({ ctor: 'Error' }));
       };
       img.src = source;
     });
+  }
+
+  function loadTextureRaw(source) {
+    return Task.asyncFunction(function(callback) {
+      var img = new Image();
+      img.onload = function() {
+        return callback(Task.succeed({ctor:'RawTexture', img:img}));
+      };
+      img.onerror = function(e) {
+        return callback(Task.fail({ ctor: 'Error' }));
+      };
+      img.src = source;
+    });
+  }
+
+  function textureSize(texture) {
+
+    return Tuple2(texture.img.width, texture.img.height);
+
   }
 
   function entity(vert, frag, buffer, uniforms) {
@@ -54,15 +73,23 @@ Elm.Native.WebGL.make = function(elm) {
 
   }
 
-  function do_texture (gl, img) {
+  function do_texture (gl, texture) {
 
     var tex = gl.createTexture();
     LOG("Created texture");
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.img);
+    switch (texture.ctor) {
+      case 'Texture':
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        break;
+      case 'RawTexture':
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        break;
+    };
     gl.generateMipmap(gl.TEXTURE_2D);
     //gl.bindTexture(gl.TEXTURE0, null);
     return tex;
@@ -293,7 +320,7 @@ Elm.Native.WebGL.make = function(elm) {
               texture.id = Utils.guid();
             }
             if (!tex) {
-              tex = do_texture(gl, texture.img);
+              tex = do_texture(gl, texture);
               model.cache.textures[texture.id] = tex;
             }
             var activeName = 'TEXTURE' + textureCounter;
@@ -421,7 +448,9 @@ Elm.Native.WebGL.make = function(elm) {
 
   return elm.Native.WebGL.values = {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
+    textureSize:textureSize,
     loadTexture:loadTexture,
+    loadTextureRaw:loadTextureRaw,
     entity:F4(entity),
     webgl:F2(webgl)
   };

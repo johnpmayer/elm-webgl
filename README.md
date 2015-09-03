@@ -1,6 +1,6 @@
 # WebGL for Elm
 
-[A simple API](http://library.elm-lang.org/catalog/johnpmayer-elm-webgl/latest/)
+[A simple API](http://package.elm-lang.org/packages/johnpmayer/elm-webgl/latest/WebGL)
 for rendering with WebGL. This is useful for both 2D and 3D
 rendering because it lets you take advantage of hardware acceleration with the
 GPU, meaning you can render things more quickly.
@@ -8,11 +8,11 @@ GPU, meaning you can render things more quickly.
 Here are some examples so you can get a feel for the API, but make sure you
 read on to learn how WebGL and the GPU really work!
 
-[![Triangle](http://elm-lang.org/screenshot/WebGL/Triangle.jpg)](http://elm-lang.org/edit/examples/WebGL/Triangle.elm)
-[![Cube](http://elm-lang.org/screenshot/WebGL/Cube.jpg)](http://elm-lang.org/edit/examples/WebGL/Cube.elm)
-[![Crate](http://elm-lang.org/screenshot/WebGL/Crate.jpg)](http://elm-lang.org/edit/examples/WebGL/Crate.elm)
-[![Thwomp](http://elm-lang.org/screenshot/WebGL/Thwomp.jpg)](http://elm-lang.org/edit/examples/WebGL/Thwomp.elm)
-[![FirstPerson](http://elm-lang.org/screenshot/WebGL/FirstPerson.jpg)](http://elm-lang.org/edit/examples/WebGL/FirstPerson.elm)
+[![Triangle](http://elm-lang.org/screenshot/WebGL/Triangle.jpg)](http://elm-lang.org/examples/triangle)
+[![Cube](http://elm-lang.org/screenshot/WebGL/Cube.jpg)](http://elm-lang.org/examples/cube)
+[![Crate](http://elm-lang.org/screenshot/WebGL/Crate.jpg)](http://elm-lang.org/examples/crate)
+[![Thwomp](http://elm-lang.org/screenshot/WebGL/Thwomp.jpg)](http://elm-lang.org/examples/thwomp)
+[![FirstPerson](http://elm-lang.org/screenshot/WebGL/FirstPerson.jpg)](http://elm-lang.org/examples/first-person)
 
 
 ## Understanding WebGL
