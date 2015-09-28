@@ -26,24 +26,11 @@ Elm.Native.WebGL.make = function(elm) {
     return { src : src };
   }
 
-  function loadTexture(source) {
+  function loadTexture(source, filter) {
     return Task.asyncFunction(function(callback) {
       var img = new Image();
       img.onload = function() {
-        return callback(Task.succeed({ctor:'Texture', img:img}));
-      };
-      img.onerror = function(e) {
-        return callback(Task.fail({ ctor: 'Error' }));
-      };
-      img.src = source;
-    });
-  }
-
-  function loadTextureRaw(source) {
-    return Task.asyncFunction(function(callback) {
-      var img = new Image();
-      img.onload = function() {
-        return callback(Task.succeed({ctor:'RawTexture', img:img}));
+        return callback(Task.succeed({ctor:'Texture', img:img, filter:filter}));
       };
       img.onerror = function(e) {
         return callback(Task.fail({ ctor: 'Error' }));
@@ -81,12 +68,12 @@ Elm.Native.WebGL.make = function(elm) {
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.img);
-    switch (texture.ctor) {
-      case 'Texture':
+    switch (texture.filter.ctor) {
+      case 'Linear':
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         break;
-      case 'RawTexture':
+      case 'Nearest':
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         break;
@@ -516,7 +503,7 @@ Elm.Native.WebGL.make = function(elm) {
   return elm.Native.WebGL.values = {
     unsafeCoerceGLSL:unsafeCoerceGLSL,
     textureSize:textureSize,
-    loadTexture:loadTexture,
+    loadTexture:F2(loadTexture),
     render:F5(render),
     webgl:F3(webgl),
     enable:enable,
@@ -530,8 +517,7 @@ Elm.Native.WebGL.make = function(elm) {
     stencilFunc:F3(stencilFunc),
     stencilFuncSeparate:F4(stencilFuncSeparate),
     stencilOperation:F3(stencilOperation),
-    stencilOperationSeparate:F4(stencilOperationSeparate),
-    loadTextureRaw:loadTextureRaw,
+    stencilOperationSeparate:F4(stencilOperationSeparate)
   };
 
 };
