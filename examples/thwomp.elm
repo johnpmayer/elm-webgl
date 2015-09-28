@@ -2,7 +2,6 @@
 -- http://the-papernes-guy.deviantart.com/art/Thwomps-Thwomps-Thwomps-186879685
 
 import Graphics.Element exposing (..)
-import Http exposing (..)
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 as V3 exposing (..)
 import Math.Matrix4 exposing (..)
@@ -30,9 +29,11 @@ textures =
 
 port fetchTextures : Task WebGL.Error ()
 port fetchTextures =
-  loadTextureWithFilter Nearest "/texture/thwomp_face.jpg" `andThen` \faceTexture ->
-  loadTextureWithFilter Nearest "/texture/thwomp_side.jpg" `andThen` \sideTexture ->
-  Signal.send textures.address (Just faceTexture, Just sideTexture)
+  loadTextureWithFilter Nearest "/examples/textures/thwomp_face.jpg"
+  `andThen` \faceTexture ->
+  loadTextureWithFilter Nearest "/examples/textures/thwomp_side.jpg"
+  `andThen` \sideTexture ->
+    Signal.send textures.address (Just faceTexture, Just sideTexture)
 
 
 -- MESHES - define the mesh for a Thwomp's face
