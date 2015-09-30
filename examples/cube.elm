@@ -25,8 +25,10 @@ type alias Vertex =
     , position : Vec3
     }
 
+type alias Triangle = (Vertex, Vertex, Vertex)
 
-cube : List (Triangle Vertex)
+
+cube : Drawable Vertex
 cube =
   let
     rft = vec3  1  1  1   -- right, front, top
@@ -38,17 +40,17 @@ cube =
     lfb = vec3 -1  1 -1
     lbb = vec3 -1 -1 -1
   in
-    List.concat
+    Triangle (List.concat
       [ face green  rft rfb rbb rbt   -- right
       , face blue   rft rfb lfb lft   -- front
       , face yellow rft lft lbt rbt   -- top
       , face red    rfb lfb lbb rbb   -- bottom
       , face purple lft lfb lbb lbt   -- left
       , face orange rbt rbb lbb lbt   -- back
-      ]
+      ])
 
 
-face : Color -> Vec3 -> Vec3 -> Vec3 -> Vec3 -> List (Triangle Vertex)
+face : Color -> Vec3 -> Vec3 -> Vec3 -> Vec3 -> List Triangle
 face rawColor a b c d =
   let
     color =
@@ -68,9 +70,9 @@ face rawColor a b c d =
 
 -- VIEW
 
-scene : Float -> List Entity
+scene : Float -> List Renderable
 scene angle =
-  [ entity vertexShader fragmentShader cube (uniforms angle) ]
+  [ render vertexShader fragmentShader cube (uniforms angle) ]
 
 
 uniforms : Float -> { rotation:Mat4, perspective:Mat4, camera:Mat4, shade:Float }
