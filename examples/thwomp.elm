@@ -2,7 +2,6 @@
 -- http://the-papernes-guy.deviantart.com/art/Thwomps-Thwomps-Thwomps-186879685
 
 import Graphics.Element exposing (..)
-import Http exposing (..)
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 as V3 exposing (..)
 import Math.Matrix4 exposing (..)
@@ -41,26 +40,27 @@ type alias Vertex =
     { position : Vec3, coord : Vec3 }
 
 
-face : List (Triangle Vertex)
+face : List (Vertex, Vertex, Vertex)
 face =
-    rotatedSquare (0,0)
+   rotatedSquare (0,0)
 
 
-sides : List (Triangle Vertex)
+sides : List (Vertex, Vertex, Vertex)
 sides =
     List.concatMap rotatedSquare [ (90,0), (180,0), (270,0), (0,90), (0,-90) ]
 
 
-rotatedSquare : (Float,Float) -> List (Triangle Vertex)
+rotatedSquare : (Float,Float) -> List (Vertex, Vertex, Vertex)
 rotatedSquare (angleXZ,angleYZ) =
     let x = makeRotate (degrees angleXZ) j
         y = makeRotate (degrees angleYZ) i
         t = x `mul` y
+        each f (a,b,c) = (f a, f b, f c)
     in
-        List.map (WebGL.map (\v -> {v | position <- transform t v.position })) square
+        List.map (each (\v -> {v | position <- transform t v.position })) square
 
 
-square : List (Triangle Vertex)
+square : List (Vertex, Vertex, Vertex)
 square =
     let topLeft     = Vertex (vec3 -1  1 1) (vec3 0 1 0)
         topRight    = Vertex (vec3  1  1 1) (vec3 1 1 0)
@@ -91,8 +91,8 @@ perspective (w',h') (x',y') =
             (makeLookAt eye (vec3 0 0 0) j)
 
 
-view : List (Triangle Vertex)
-    -> List (Triangle Vertex)
+view : List (Vertex, Vertex, Vertex)
+    -> List (Vertex, Vertex, Vertex)
     -> (Int,Int)
     -> (Maybe Texture, Maybe Texture)
     -> Mat4
@@ -102,11 +102,11 @@ view mesh1 mesh2 dimensions (texture1, texture2) perspective =
         (toEntity mesh1 texture1 perspective ++ toEntity mesh2 texture2 perspective)
 
 
-toEntity : List (Triangle Vertex) -> Maybe Texture -> Mat4 -> List Entity
+toEntity : List (Vertex, Vertex, Vertex) -> Maybe Texture -> Mat4 -> List Renderable
 toEntity mesh response perspective =
   response
   |> Maybe.map (\texture ->
-    [ entity vertexShader fragmentShader mesh { texture=texture, perspective=perspective } ])
+    [ render vertexShader fragmentShader (Triangle mesh) { texture=texture, perspective=perspective } ])
   |> Maybe.withDefault []
 
 

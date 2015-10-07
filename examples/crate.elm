@@ -1,5 +1,4 @@
 import Graphics.Element exposing (..)
-import Http exposing (..)
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
 import Math.Matrix4 exposing (..)
@@ -35,22 +34,25 @@ port textureFetcher =
 
 -- MESHES
 
-crate : List (Triangle { pos:Vec3, coord:Vec3 })
+crate : Drawable { pos:Vec3, coord:Vec3 }
 crate =
+  Triangle <|
   List.concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
 
 
-rotatedFace : (Float,Float) -> List (Triangle { pos:Vec3, coord:Vec3 })
+rotatedFace : (Float,Float) -> List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
 rotatedFace (angleX,angleY) =
   let
     x = makeRotate (degrees angleX) (vec3 1 0 0)
     y = makeRotate (degrees angleY) (vec3 0 1 0)
     t = x `mul` y `mul` makeTranslate (vec3 0 0 1)
+    each f (a,b,c) =
+      (f a, f b, f c)
   in
-    List.map (WebGL.map (\x -> {x | pos <- transform t x.pos })) face
+    List.map (each (\x -> {x | pos <- transform t x.pos })) face
 
 
-face : List (Triangle { pos:Vec3, coord:Vec3 })
+face : List ({ pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 }, { pos:Vec3, coord:Vec3 })
 face =
   let
     topLeft     = { pos = vec3 -1  1 0, coord = vec3 0 1 0 }
@@ -85,14 +87,14 @@ camera =
   makeLookAt (vec3 0 0 5) (vec3 0 0 0) (vec3 0 1 0)
 
 
-view : Maybe Texture -> Mat4 -> List Entity
+view : Maybe Texture -> Mat4 -> List Renderable
 view maybeTexture perspective =
   case maybeTexture of
     Nothing ->
         []
 
     Just tex ->
-        [entity vertexShader fragmentShader crate { crate = tex, perspective = perspective }]
+        [render vertexShader fragmentShader crate { crate = tex, perspective = perspective }]
 
 
 -- SHADERS

@@ -1,7 +1,6 @@
 -- Try adding the ability to crouch or to land on top of the crate.
 
 import Graphics.Element exposing (..)
-import Http exposing (..)
 import Keyboard
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 exposing (..)
@@ -104,14 +103,14 @@ gravity dt person =
 
 -- SIGNALS
 
-world : Maybe Texture -> Mat4 -> List Entity
+world : Maybe Texture -> Mat4 -> List Renderable
 world maybeTexture perspective =
   case maybeTexture of
     Nothing ->
         []
 
     Just tex ->
-        [entity vertexShader fragmentShader crate { crate=tex, perspective=perspective }]
+        [render vertexShader fragmentShader crate { crate=tex, perspective=perspective }]
 
 
 main : Signal Element
@@ -156,7 +155,7 @@ perspective (w,h) person =
       (makeLookAt person.position (person.position `add` k) j)
 
 
-view : (Int,Int) -> List Entity -> Element
+view : (Int,Int) -> List Renderable -> Element
 view (w,h) entities =
   layers
     [ webgl (w,h) entities
@@ -183,22 +182,23 @@ type alias Vertex =
     }
 
 
-crate : List (Triangle Vertex)
+crate : Drawable Vertex
 crate =
-  List.concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ]
+  Triangle (List.concatMap rotatedFace [ (0,0), (90,0), (180,0), (270,0), (0,90), (0,-90) ])
 
 
-rotatedFace : (Float,Float) -> List (Triangle Vertex)
+rotatedFace : (Float,Float) -> List (Vertex, Vertex, Vertex)
 rotatedFace (angleXZ,angleYZ) =
   let
     x = makeRotate (degrees angleXZ) j
     y = makeRotate (degrees angleYZ) i
     t = x `mul` y
+    each f (a,b,c) = (f a, f b, f c)
   in
-    List.map (WebGL.map (\v -> {v | position <- transform t v.position })) face
+    List.map (each (\v -> {v | position <- transform t v.position })) face
 
 
-face : List (Triangle Vertex)
+face : List (Vertex, Vertex, Vertex)
 face =
   let
     topLeft     = Vertex (vec3 -1  1 1) (vec3 0 1 0)
