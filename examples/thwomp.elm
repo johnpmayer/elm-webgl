@@ -2,12 +2,11 @@
 -- http://the-papernes-guy.deviantart.com/art/Thwomps-Thwomps-Thwomps-186879685
 
 import Graphics.Element exposing (..)
-import Http exposing (..)
 import Math.Vector2 exposing (Vec2)
 import Math.Vector3 as V3 exposing (..)
 import Math.Matrix4 exposing (..)
 import Mouse
-import Task exposing (Task)
+import Task exposing (Task, andThen)
 import WebGL exposing (..)
 import Window
 
@@ -30,9 +29,11 @@ textures =
 
 port fetchTextures : Task WebGL.Error ()
 port fetchTextures =
-  loadTexture "/texture/thwomp_face.jpg" `Task.andThen` \faceTexture ->
-  loadTexture "/texture/thwomp_side.jpg" `Task.andThen` \sideTexture ->
-  Signal.send textures.address (Just faceTexture, Just sideTexture)
+  loadTextureWithFilter Nearest "/examples/textures/thwomp_face.jpg"
+  `andThen` \faceTexture ->
+  loadTextureWithFilter Nearest "/examples/textures/thwomp_side.jpg"
+  `andThen` \sideTexture ->
+    Signal.send textures.address (Just faceTexture, Just sideTexture)
 
 
 -- MESHES - define the mesh for a Thwomp's face
@@ -41,34 +42,44 @@ type alias Vertex =
     { position : Vec3, coord : Vec3 }
 
 
-face : List (Triangle Vertex)
+face : List (Drawable Vertex)
 face =
     rotatedSquare (0,0)
 
 
-sides : List (Triangle Vertex)
+sides : List (Drawable Vertex)
 sides =
     List.concatMap rotatedSquare [ (90,0), (180,0), (270,0), (0,90), (0,-90) ]
 
 
-rotatedSquare : (Float,Float) -> List (Triangle Vertex)
+{-| Apply a function to each vertex. This lets you transform the set of
+attributes associated with each corner of a triangle.
+-}
+mapT : (a -> a) -> Drawable a -> Drawable a
+mapT f a =
+  case a of
+    Triangle [(x, y, z)] ->
+      Triangle [(f x, f y, f z)]
+    _ -> a
+
+rotatedSquare : (Float,Float) -> List (Drawable Vertex)
 rotatedSquare (angleXZ,angleYZ) =
     let x = makeRotate (degrees angleXZ) j
         y = makeRotate (degrees angleYZ) i
         t = x `mul` y
     in
-        List.map (WebGL.map (\v -> {v | position <- transform t v.position })) square
+        List.map (mapT (\v -> {v | position <- transform t v.position })) square
 
 
-square : List (Triangle Vertex)
+square : List (Drawable Vertex)
 square =
     let topLeft     = Vertex (vec3 -1  1 1) (vec3 0 1 0)
         topRight    = Vertex (vec3  1  1 1) (vec3 1 1 0)
         bottomLeft  = Vertex (vec3 -1 -1 1) (vec3 0 0 0)
         bottomRight = Vertex (vec3  1 -1 1) (vec3 1 0 0)
     in
-        [ (topLeft,topRight,bottomLeft)
-        , (bottomLeft,topRight,bottomRight)
+        [ Triangle [(topLeft,    topRight, bottomLeft)]
+        , Triangle [(bottomLeft, topRight, bottomRight)]
         ]
 
 
@@ -91,8 +102,8 @@ perspective (w',h') (x',y') =
             (makeLookAt eye (vec3 0 0 0) j)
 
 
-view : List (Triangle Vertex)
-    -> List (Triangle Vertex)
+view : List (Drawable Vertex)
+    -> List (Drawable Vertex)
     -> (Int,Int)
     -> (Maybe Texture, Maybe Texture)
     -> Mat4
@@ -102,11 +113,14 @@ view mesh1 mesh2 dimensions (texture1, texture2) perspective =
         (toEntity mesh1 texture1 perspective ++ toEntity mesh2 texture2 perspective)
 
 
-toEntity : List (Triangle Vertex) -> Maybe Texture -> Mat4 -> List Entity
+toEntity : List (Drawable Vertex) -> Maybe Texture -> Mat4 -> List Renderable
 toEntity mesh response perspective =
   response
   |> Maybe.map (\texture ->
-    [ entity vertexShader fragmentShader mesh { texture=texture, perspective=perspective } ])
+                  List.map (\d ->
+                              render vertexShader fragmentShader d
+                                     { texture=texture, perspective=perspective })
+                  mesh)
   |> Maybe.withDefault []
 
 
