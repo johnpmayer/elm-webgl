@@ -1,3 +1,5 @@
+# Note: The primary fork of this project can be found at [elm-community](https://github.com/elm-community/elm-webgl)
+
 # WebGL for Elm
 
 [A simple API](http://package.elm-lang.org/packages/johnpmayer/elm-webgl/latest/WebGL)
