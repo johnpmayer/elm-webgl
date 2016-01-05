@@ -39,7 +39,7 @@ Elm.Native.WebGL.make = function(elm) {
     });
   }
 
-  function loadTextureRaw(source) {
+  function loadTextureRaw(filter,source) {
     return Task.asyncFunction(function(callback) {
       var img = new Image();
       img.onload = function() {
@@ -531,7 +531,7 @@ Elm.Native.WebGL.make = function(elm) {
     stencilFuncSeparate:F4(stencilFuncSeparate),
     stencilOperation:F3(stencilOperation),
     stencilOperationSeparate:F4(stencilOperationSeparate),
-    loadTextureRaw:loadTextureRaw,
+    loadTextureRaw:F2(loadTextureRaw),
   };
 
 };
