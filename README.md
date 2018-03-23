@@ -1,4 +1,4 @@
-# Note: The primary fork of this project can be found at [elm-community](https://github.com/elm-community/elm-webgl)
+# Note: The primary fork of this project can be found at [elm-community](https://github.com/elm-community/webgl)
 
 # WebGL for Elm
 
